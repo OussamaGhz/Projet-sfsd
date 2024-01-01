@@ -6,28 +6,29 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define TAILLE_MAX_ENREGISTREMENT 256
+/*#define TAILLE_MAX_ENREGISTREMENT 256 | useless since la taille welat doka variable */
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
 
 // Structure te3 l'entête enregistrement physique
 typedef struct {
-    int id;             
-    int tailleDonnees;  
+    int id;
+    int tailleDonnees;
 } EnteteEnregistrement;
 
-/*ceci est a refaire , prof 9allna taille variable w ana dertha
-fixe pour le momment , mklh whd ytouchi ni sebt kifech ndirha*/
+/*code jdid te3 enregistrement physique , 2 eme champ ki rah ypointi 3la tableau de caracteres
+la taille des donnees est rendue variable psq st3mlna un pointeur char *donnees
+f placet d'un tableau de taille fixe*/
 
 typedef struct {
     EnteteEnregistrement entete;
-    char donnees[TAILLE_MAX_ENREGISTREMENT];  
+    char *donnees;  // Pointeur vers un tableau de caracteres
 } EnregistrementPhysique;
 
 
 typedef struct {
-    int nbEnregistrements;  
-    int capaciteMax;      
+    int nbEnregistrements;
+    int capaciteMax;
 } EnteteFichierTOV;
 
 // Structure te3 buffer de transmission
