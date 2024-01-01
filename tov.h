@@ -10,19 +10,23 @@
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
 
-// Structure te3 l'entête enregistrement physique
+
+/**
+ * Structure te3 l'entête enregistrement physique
+ * Contient l'ID de l'enregistrement et la taille des donnees.
+ */
 typedef struct {
     int id;
     int tailleDonnees;
 } EnteteEnregistrement;
 
-/*code jdid te3 enregistrement physique , 2 eme champ ki rah ypointi 3la tableau de caracteres
-la taille des donnees est rendue variable psq st3mlna un pointeur char *donnees
-f placet d'un tableau de taille fixe*/
 
+
+// 1er test de separer les enregistrement avec des caracteres:
 typedef struct {
     EnteteEnregistrement entete;
-    char *donnees;  // Pointeur vers un tableau de caracteres
+    char *donnees;  // Pointeur vers un tableau de caractères
+    char separateur;
 } EnregistrementPhysique;
 
 
@@ -44,12 +48,27 @@ typedef struct {
 } FichierTOV;
 
 // Prototypes de fonctions pour la gestion du fichier TOV
+
+//Verifiez si fichier n'est pas NULL
 void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
+
+//Verifiez si fichier n'est pas NULL
 void libererFichierTOV(FichierTOV *fichier);
+
+//Verifiez si fichier et le Buffer ne sont pas NULL 
 bool ajouterEnregistrement(FichierTOV *fichier, BufferTransmission *buffer);
+
+//Verifiez si fichier n'est pas NULL
 bool supprimerEnregistrement(FichierTOV *fichier, int id);
+
+//Verifiez si fichier n'est pas NULL
 EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id);
+
+//Verifiez si fichier n'est pas NULL
 void afficherFichierTOV(const FichierTOV *fichier);
+
+
+// pour hed les 2 procedures verifiez les tailles bch n'evitiw le depassement de buffer (hws 3liha)
 void remplirBuffer(BufferTransmission *buffer, const char *data);
 void viderBuffer(BufferTransmission *buffer);
 
