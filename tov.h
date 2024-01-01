@@ -16,6 +16,8 @@ typedef struct {
     int tailleDonnees;  
 } EnteteEnregistrement;
 
+/*ceci est a refaire , prof 9allna taille variable w ana dertha
+fixe pour le momment , mklh whd ytouchi ni sebt kifech ndirha*/
 
 typedef struct {
     EnteteEnregistrement entete;
