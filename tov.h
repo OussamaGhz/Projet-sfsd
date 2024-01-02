@@ -55,7 +55,7 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 //Verifiez si fichier n'est pas NULL
 void libererFichierTOV(FichierTOV *fichier);
 
-//Verifiez si fichier et le Buffer ne sont pas NULL 
+//Verifiez si fichier et le Buffer ne sont pas NULL
 bool ajouterEnregistrement(FichierTOV *fichier, BufferTransmission *buffer);
 
 //Verifiez si fichier n'est pas NULL
@@ -71,5 +71,11 @@ void afficherFichierTOV(const FichierTOV *fichier);
 // pour hed les 2 procedures verifiez les tailles bch n'evitiw le depassement de buffer (hws 3liha)
 void remplirBuffer(BufferTransmission *buffer, const char *data);
 void viderBuffer(BufferTransmission *buffer);
+
+
+/*cette fonction calcule la taille de chaque enregistrement , heka n9dro ndiro le test w nchofo beli sah
+la taille des enregistrements est variable w ttbdl d'apres wch ndkhlo hna*/
+unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregistrement);
+
 
 #endif
