@@ -10,6 +10,7 @@
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
 
+
 /**
  * Structure te3 l'entête enregistrement physique
  * Contient l'ID de l'enregistrement et la taille des donnees.
@@ -35,15 +36,13 @@ typedef struct {
 } EnteteFichierTOV;
 
 // Structure te3 buffer de transmission
-typedef struct
-{
+typedef struct {
     char data[TAILLE_BUFFER];
     int taille;
 } BufferTransmission;
 
 // Structure pour le fichier TOV sans chevauchement
-typedef struct
-{
+typedef struct {
     EnteteFichierTOV entete;
     EnregistrementPhysique *enregistrements;
 } FichierTOV;
