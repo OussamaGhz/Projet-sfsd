@@ -9,6 +9,8 @@
 /*#define TAILLE_MAX_ENREGISTREMENT 256 | useless since la taille welat doka variable */
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
+#define SEPARATEUR '|' //pas encore used
+
 
 
 /**
@@ -21,12 +23,13 @@ typedef struct {
 } EnteteEnregistrement;
 
 
-
-// 1er test de separer les enregistrement avec des caracteres:
+//j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
 typedef struct {
     EnteteEnregistrement entete;
-    char *donnees;  // Pointeur vers un tableau de caractères
-    char separateur;
+    char *data1; /*tout ces 3 champs pointent vers un tableau de caracteres*/
+    char *data2;
+    char *data3;
+    //tout ces champs
 } EnregistrementPhysique;
 
 
