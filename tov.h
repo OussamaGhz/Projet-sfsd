@@ -6,10 +6,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-/*#define TAILLE_MAX_ENREGISTREMENT 256 | useless since la taille welat doka variable */
+#define TAILLE_MAX_ENREGISTREMENT 256
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
-#define SEPARATEUR '|' //pas encore used
+#define SEPARATEUR '|'
 
 
 
@@ -19,17 +19,15 @@
  */
 typedef struct {
     int id;
-    int tailleDonnees;
+    int tailleBlocR; //taille block reel
 } EnteteEnregistrement;
 
 
 //j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
+
 typedef struct {
     EnteteEnregistrement entete;
-    char *data1; /*tout ces 3 champs pointent vers un tableau de caracteres*/
-    char *data2;
-    char *data3;
-    //tout ces champs
+    char data1[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
 
 
@@ -47,7 +45,7 @@ typedef struct {
 // Structure pour le fichier TOV sans chevauchement
 typedef struct {
     EnteteFichierTOV entete;
-    EnregistrementPhysique *enregistrements;
+    EnregistrementPhysique *enregistrements; //to change , nehi el pointeur w diro tableau
 } FichierTOV;
 
 // Prototypes de fonctions pour la gestion du fichier TOV
@@ -59,7 +57,8 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 void libererFichierTOV(FichierTOV *fichier);
 
 //Verifiez si fichier et le Buffer ne sont pas NULL
-bool ajouterEnregistrement(FichierTOV *fichier, BufferTransmission *buffer);
+bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregistrement);
+
 
 //Verifiez si fichier n'est pas NULL
 bool supprimerEnregistrement(FichierTOV *fichier, int id);
