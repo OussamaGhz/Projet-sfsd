@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
     EnteteEnregistrement entete;
-    char data1[TAILLE_MAX_ENREGISTREMENT];
+    char data1[TAILLE_MAX_ENREGISTREMENT]; //tableau de caracteres
 } EnregistrementPhysique;
 
 
