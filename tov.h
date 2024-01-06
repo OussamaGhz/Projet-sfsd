@@ -23,7 +23,7 @@ typedef struct {
 } EnteteEnregistrement;
 
 
-//j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
+
 
 typedef struct {
     EnteteEnregistrement entete;
