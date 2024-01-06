@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "tov.h"
 
 EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id) { 
@@ -29,5 +30,11 @@ void viderBuffer(BufferTransmission *buffer) {
 
 int main() {
     printf("Hello, Rayane!");
+=======
+#include <stdio.h>
+
+int main() {
+    printf("Hello, hhhh");
+>>>>>>> 7dea2334924ad46f27ff21066786920d5d7d508a
     return 0;
 }
