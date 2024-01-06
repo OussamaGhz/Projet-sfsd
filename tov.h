@@ -23,14 +23,6 @@ typedef struct {
 } EnteteEnregistrement;
 
 
-<<<<<<< HEAD
-
-// 1er test de separer les enregistrement avec des caracteres:
-typedef struct {
-    EnteteEnregistrement entete;
-    char *donnees;  // Pointeur vers un tableau de caractères
-    char separateur;
-=======
 //j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
 typedef struct {
     EnteteEnregistrement entete;
@@ -38,7 +30,6 @@ typedef struct {
     char *data2;
     char *data3;
     //tout ces champs
->>>>>>> 7dea2334924ad46f27ff21066786920d5d7d508a
 } EnregistrementPhysique;
 
 
