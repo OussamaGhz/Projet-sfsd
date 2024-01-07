@@ -27,12 +27,12 @@
             <property name="homogeneous">true</property>
             <child>
               <object class="GtkButton" id="button_add">
-                <property name="label">Add File</property>
+                <property name="label">Add</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="button_delete">
-                <property name="label">Delete File</property>
+                <property name="label">Delete</property>
               </object>
             </child>
             <child>
