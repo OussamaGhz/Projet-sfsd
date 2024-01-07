@@ -23,11 +23,11 @@ typedef struct {
 } EnteteEnregistrement;
 
 
-
+//j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
 
 typedef struct {
     EnteteEnregistrement entete;
-    char data1[TAILLE_MAX_ENREGISTREMENT]; //tableau de caracteres , pas de pointeurs
+    char data1[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
 
 
@@ -58,7 +58,6 @@ void libererFichierTOV(FichierTOV *fichier);
 
 //Verifiez si fichier et le Buffer ne sont pas NULL
 bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregistrement);
-
 
 //Verifiez si fichier n'est pas NULL
 bool supprimerEnregistrement(FichierTOV *fichier, int id);
