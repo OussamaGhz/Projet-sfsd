@@ -6,14 +6,26 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data);
 void on_button_delete_clicked(GtkButton *button, gpointer user_data);
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data);
 void on_button_modify_content_clicked(GtkButton *button, gpointer user_data);
+void on_button_confirm_clicked(GtkButton *button, gpointer modal_window);
+
+// to delete
+typedef struct
+{
+    char first_name[100];
+    char second_name[100];
+    char id[50];
+} PersonInfo;
+
+PersonInfo people[100]; // Array to hold information for up to 100 people
+int people_count = 0;   // Counter for the number of people added
 
 // Activation callback
 static void activate(GtkApplication *app, gpointer user_data)
 {
     GtkBuilder *builder;
     GtkWidget *window;
-    GtkWidget *button_add, *button_delete, *button_show_content, *button_modify_content;
-
+    GtkWidget *modal_window;
+    GtkWidget *button_add, *button_delete, *button_show_content, *button_modify_content, *confirm_button;
     // Initialize your TOV file (replace with actual initialization)
     FichierTOV *fichier = g_malloc(sizeof(FichierTOV));
     initialiserFichierTOV(fichier, MAX_ENREGISTREMENTS);
@@ -27,8 +39,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_delete"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_show_content"));
     button_modify_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_modify_content"));
-
-    if (!window || !button_add || !button_delete || !button_show_content || !button_modify_content)
+    confirm_button = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
+    if (!window || !button_add || !button_delete || !button_show_content || !button_modify_content || !confirm_button)
     {
         g_printerr("Failed to fetch widgets from the Glade file\n");
         g_object_unref(builder);
@@ -37,11 +49,12 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     // Set the application for the window and connect signals
     gtk_window_set_application(GTK_WINDOW(window), app);
-    g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), fichier);
+
+    g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), window);
     g_signal_connect(button_delete, "clicked", G_CALLBACK(on_button_delete_clicked), fichier);
     g_signal_connect(button_show_content, "clicked", G_CALLBACK(on_button_show_content_clicked), fichier);
     g_signal_connect(button_modify_content, "clicked", G_CALLBACK(on_button_modify_content_clicked), fichier);
-
+    g_signal_connect(confirm_button, "clicked", G_CALLBACK(on_button_confirm_clicked), modal_window);
     // Show the window
     gtk_window_present(GTK_WINDOW(window));
 
@@ -52,33 +65,39 @@ static void activate(GtkApplication *app, gpointer user_data)
 // Signal handler for the "Add" button
 void on_button_add_clicked(GtkButton *button, gpointer user_data)
 {
-    // Implement add functionality
-    // For example, open a dialog to get new record details, then add it to the TOV file
-    g_print("Add Button Clicked\n");
+
+    printf("Confirm button was clicked\n");
+    GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
+    GtkWidget *modal_window = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_modal"));
+
+    // Set parent window for the modal
+    GtkWindow *parent_window = GTK_WINDOW(user_data);
+    gtk_window_set_transient_for(GTK_WINDOW(modal_window), parent_window);
+
+    // Present the modal window using gtk_window_present
+    gtk_window_present(GTK_WINDOW(modal_window));
+    g_object_unref(builder);
 }
 
-// Signal handler for the "Delete" button
-void on_button_delete_clicked(GtkButton *button, gpointer user_data)
+void on_button_confirm_clicked(GtkButton *button, gpointer modal_window)
 {
-    // Implement delete functionality
-    // For example, prompt for an ID and then delete the corresponding record
-    g_print("Delete Button Clicked\n");
+    printf("Confirm button was clicked\n");
+    // Your code here...
 }
 
-// Signal handler for the "Show Content" button
-void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
-{
-    // Implement show content functionality
-    // For example, iterate through the TOV file and display its contents
-    g_print("Show Content Button Clicked\n");
-}
-
-// Signal handler for the "Modify Content" button
 void on_button_modify_content_clicked(GtkButton *button, gpointer user_data)
 {
-    // Implement modify content functionality
-    // For example, open a dialog to get new content for an existing record
-    g_print("Modify Content Button Clicked\n");
+    printf("Confirm button was clicked\n");
+}
+
+void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
+{
+    printf("Confirm button was clicked\n");
+}
+
+void on_button_delete_clicked(GtkButton *button, gpointer user_data)
+{
+    printf("Confirm button was clicked\n");
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -216,6 +235,7 @@ int main(int argc, char *argv[])
 {
     GtkApplication *app;
     int status;
+    printf("helloworld");
 
     // Create a new application
     app = gtk_application_new("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);

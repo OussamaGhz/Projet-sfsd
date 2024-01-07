@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+  <object class="GtkWindow" id="main_window">
+    <property name="title">File Manager</property>
+    <property name="default-width">600</property>
+    <property name="default-height">400</property>
+    <child>
+      <object class="GtkBox" id="vbox_main">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <!-- Vertical Box for displaying content and buttons -->
+        <child>
+          <!-- Label for displaying content -->
+          <object class="GtkLabel" id="label_content">
+            <property name="width-request">580</property>
+            <property name="height-request">600</property>
+            <property name="visible">True</property>
+            <property name="label">[Content will be displayed here]</property>
+            <property name="wrap">true</property>
+          </object>
+        </child>
+        <child>
+          <!-- Horizontal Box for buttons -->
+          <object class="GtkBox" id="hbox_buttons">
+            <property name="homogeneous">true</property>
+            <child>
+              <object class="GtkButton" id="button_add">
+                <property name="label">Add</property>
+                <property name="width-request">150</property> <!-- Increase width -->
+                <property name="height-request">100</property> <!-- Increase height -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_delete">
+                <property name="label">Delete</property>
+                <property name="width-request">150</property> <!-- Increase width -->
+                <property name="height-request">100</property> <!-- Increase height -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_show_content">
+                <property name="label">Show Content</property>
+                <property name="width-request">150</property> <!-- Increase width -->
+                <property name="height-request">100</property> <!-- Increase height -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_modify_content">
+                <property name="label">Modify Content</property>
+                <property name="width-request">150</property> <!-- Increase width -->
+                <property name="height-request">100</property> <!-- Increase height -->
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <object class="GtkDialog" id="add_item_modal">
+    <property name="title">Add Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="first_name_label">
+            <property name="label">Enter first name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="first_name_entry"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="second_name_label">
+            <property name="label">Enter second name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="second_name_entry"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="id_label">
+            <property name="label">Enter ID (numbers only):</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="id_entry"/>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm">
+            <property name="label">Confirm</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
