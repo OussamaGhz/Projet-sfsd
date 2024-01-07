@@ -6,7 +6,6 @@
 
 // gtk configuration
 
-
 // Signal handler for the "Add File" button
 void on_button_add_clicked(GtkButton *button, gpointer user_data)
 {
@@ -14,27 +13,41 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
 
     // Create a new modal window
     GtkWidget *modal_window = gtk_window_new();
-    gtk_window_set_title(GTK_WINDOW(modal_window), "Add New Item");
+    gtk_window_set_title(GTK_WINDOW(modal_window), "Add Item");
     gtk_window_set_transient_for(GTK_WINDOW(modal_window), parent_window);
     gtk_window_set_modal(GTK_WINDOW(modal_window), TRUE);
 
-    // Create a box to hold the label and entry
+    // Create a box to hold the labels and entries
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_window_set_child(GTK_WINDOW(modal_window), box);
 
-    // Create and add a label and entry to the box
-    GtkWidget *label = gtk_label_new("Enter the new item details:");
-    GtkWidget *entry = gtk_entry_new();
-    gtk_box_append(GTK_BOX(box), label);
-    gtk_box_append(GTK_BOX(box), entry);
+    gtk_widget_set_margin_start(box, 40);
+    gtk_widget_set_margin_end(box, 40);
+    gtk_widget_set_margin_top(box, 40);
+    gtk_widget_set_margin_bottom(box, 40);
 
-    // Set widgets as visible
-    gtk_widget_set_visible(box, TRUE);
-    gtk_widget_set_visible(label, TRUE);
-    gtk_widget_set_visible(entry, TRUE);
-    gtk_window_present(GTK_WINDOW(modal_window)); // Present the modal window
+    // Create and add the first name label and entry to the box
+    GtkWidget *first_name_label = gtk_label_new("Enter first name:");
+    GtkWidget *first_name_entry = gtk_entry_new();
+    gtk_box_append(GTK_BOX(box), first_name_label);
+    gtk_box_append(GTK_BOX(box), first_name_entry);
+
+    // Create and add the second name label and entry to the box
+    GtkWidget *second_name_label = gtk_label_new("Enter second name:");
+    GtkWidget *second_name_entry = gtk_entry_new();
+    gtk_box_append(GTK_BOX(box), second_name_label);
+    gtk_box_append(GTK_BOX(box), second_name_entry);
+
+    // Create and add the ID label and entry to the box
+    GtkWidget *id_label = gtk_label_new("Enter ID (numbers only):");
+    GtkWidget *id_entry = gtk_entry_new();
+    gtk_entry_set_input_purpose(GTK_ENTRY(id_entry), GTK_INPUT_PURPOSE_DIGITS); // Sets input method for ID to accept only numbers
+    gtk_box_append(GTK_BOX(box), id_label);
+    gtk_box_append(GTK_BOX(box), id_entry);
+
+    // Present the modal window
+    gtk_window_present(GTK_WINDOW(modal_window));
 }
-
 // Activation callback
 static void activate(GtkApplication *app, gpointer user_data)
 {
@@ -43,7 +56,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *button_add;
 
     // Create a new builder from the Glade file
-    builder = gtk_builder_new_from_file("design.glade");
+    builder = gtk_builder_new_from_file("design.glade~");
 
     // Get the main window and button from the builder
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
