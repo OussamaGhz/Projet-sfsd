@@ -1,15 +1,50 @@
 #include "tov.h"
 
+//initialisation du fichierTOV
+void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
+
+    //verifie si le pointeur fichier est NULL
+    //Raison: je previent l'acces a un pointeur non initialisé
+    if (fichier == NULL) {
+        printf("initialiserFichierTOV: fichier is NULL\n");
+        return;
+    }
+    
+    //initialisation des champs de l'entete
+    fichier->entete.nbEnregistrements = 0;
+    fichier->entete.capaciteMax = capaciteMax;
+
+    //alloue de la mémoire pour stocker les enregistrements, based on la capaciteMax
+    fichier->enregistrements = malloc(capaciteMax * sizeof(EnregistrementPhysique));
+
+    //vérifie si l'allocation de mémoire a echoué
+    if (fichier->enregistrements == NULL) {
+        printf("initialiserFichierTOV: Memory allocation failed\n");
+        return;
+    }
+
+    //affichage de reussite de initialisation et initialisation de nextID à 0
+    printf("initialiserFichierTOV: initialization successful\n");
+    fichier->entete.nextID = 0;
+}
 
 
+//liberation du fichierTOV soon
 
-//1st try to use file functions in ajouterEnregistrment:
+
+//la fonction retourne un TRUE si l'ajout est reussi et false sinon , simple concept
 bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregistrement) {
+
+    //en ajoutant cette linge de code , le probleme de id is fixed :)
+    enregistrement->entete.id = fichier->entete.nbEnregistrements;
+
     const char *nomFichier = "monFichierTOV.tov";
+
+    //verification si les 2 pointeurs sont NULL pour eviter des erreurs de segmentation
     if (fichier == NULL || enregistrement == NULL) return false;
 
-    FILE *fichierPhysique = fopen(nomFichier, "a"); // Mode texte bch najoutiw
-    if (fichierPhysique == NULL) return false;
+    FILE *fichierPhysique = fopen(nomFichier, "a"); // opening el file in mode append
+    if (fichierPhysique == NULL) return false; //to make sure beli el file is opened
 
     // check la capacite maximale avant d'inserer
     if (fichier->entete.nbEnregistrements >= fichier->entete.capaciteMax) {
@@ -17,22 +52,26 @@ bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregist
         return false;
     }
 
-    // Écriture formatée dans le fichier
+    enregistrement->entete.id = fichier->entete.nextID++; //new logique de id
+
+    //j'ai utilise fprintf pour écrire les données de enregistrement dans le fichier , le format est %d | %s
     fprintf(fichierPhysique, "%d|%s\n", enregistrement->entete.id, enregistrement->data1);
 
-    // Ajout en mémoire
+    //j'augmente le compteur nbEnregistrements quand j'ajoute l'enregistrement dans le tableau "enregistrements" de "fichier"
     fichier->enregistrements[fichier->entete.nbEnregistrements] = *enregistrement;
     fichier->entete.nbEnregistrements++;
 
+    //ferméture du fichier
     fclose(fichierPhysique);
     return true;
 }
 
 
-
+//1er test fonction suppression /soon
 
 
 //utiliser la fonction dans main
+//we cant use le programme yet car j'ai pas utiliser l'initialisation du fichier dans main /soon
 int main() {
     FichierTOV fichier;
     BufferTransmission buffer;

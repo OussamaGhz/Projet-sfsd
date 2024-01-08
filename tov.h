@@ -34,6 +34,7 @@ typedef struct {
 typedef struct {
     int nbEnregistrements;
     int capaciteMax;
+    int nextID; // nouveau champ pour suivre l'id global
 } EnteteFichierTOV;
 
 // Structure te3 buffer de transmission
