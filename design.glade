@@ -63,41 +63,48 @@
     <property name="title">Add Item</property>
     <property name="modal">True</property>
     <child>
-      <placeholder/>
+        <placeholder/>
     </child>
     <child>
-      <object class="GtkBox" id="modal_box">
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel" id="first_name_label">
-            <property name="label">Enter first name:</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkEntry" id="first_name_entry"/>
-        </child>
-        <child>
-          <object class="GtkLabel" id="second_name_label">
-            <property name="label">Enter second name:</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkEntry" id="second_name_entry"/>
-        </child>
-        <child>
-          <object class="GtkLabel" id="id_label">
-            <property name="label">Enter ID (numbers only):</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkEntry" id="id_entry"/>
-        </child>
-        <child>
-          <object class="GtkButton" id="button_confirm">
-            <property name="label">Confirm</property>
-          </object>
-        </child>
-      </object>
+        <object class="GtkBox" id="modal_box">
+            <property name="orientation">vertical</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <child>
+                <object class="GtkLabel" id="first_name_label">
+                    <property name="label">Enter first name:</property>
+                </object>
+            </child>
+            <child>
+                <object class="GtkEntry" id="first_name_entry"/>
+            </child>
+            <child>
+                <object class="GtkLabel" id="second_name_label">
+                    <property name="label">Enter second name:</property>
+                    <property name="margin-top">10</property>
+                </object>
+            </child>
+            <child>
+                <object class="GtkEntry" id="second_name_entry"/>
+            </child>
+            <child>
+                <object class="GtkLabel" id="id_label">
+                    <property name="label">Enter ID (numbers only):</property>
+                    <property name="margin-top">10</property>
+                </object>
+            </child>
+            <child>
+                <object class="GtkEntry" id="id_entry"/>
+            </child>
+            <child>
+                <object class="GtkButton" id="button_confirm">
+                    <property name="label">Confirm</property>
+                    <property name="margin-top">20</property>
+                </object>
+            </child>
+        </object>
     </child>
-  </object>
+</object>
 </interface>
