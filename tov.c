@@ -81,13 +81,38 @@ bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregist
 }
 
 
-//1er test fonction suppression /soon
+//fonction pour afficher le contenue de fichier:
+void afficherFichierTOV(const FichierTOV *fichier) {
+    if (fichier == NULL) return;
+    //bouvle simple pour afficher les enregistrement et leur contenue
+    printf("Fichier TOV contient %d enregistrements:\n", fichier->entete.nbEnregistrements);
+    for (int i = 0; i < fichier->entete.nbEnregistrements; i++) {
+        printf("Enregistrement %d:\n", i);
+        printf("data1: %s\n", fichier->enregistrements[i].data1);
+    }
+}
+
+
+//utiliser le buffer pour gerer le tampon de transmission avec ces 2 fonctions
+//Explication later
+void remplirBuffer(BufferTransmission *buffer, const char *data) {
+    if (buffer == NULL || data == NULL) return;
+
+    strncpy(buffer->data, data, TAILLE_BUFFER);
+    buffer->data[TAILLE_BUFFER - 1] = '\0';
+    buffer->taille = strlen(buffer->data);
+}
+
+void viderBuffer(BufferTransmission *buffer) {
+    if (buffer == NULL) return;
+
+    memset(buffer->data, 0, TAILLE_BUFFER);
+    buffer->taille = 0;
+}
 
 
 
-
-
-
+//Le programme a un probleme avec le fichier physique , nriglih omba3d
 //utiliser les fonctions dans main
 int main() {
     //explication des variables
@@ -108,7 +133,8 @@ int main() {
     {
         printf("\nChoisissez une operation:\n");
         printf("1- Ajouter un enregistrement\n");
-        printf("2- Quitter le programme\n");
+        printf("2- Afficher le contenu du fichier\n");
+        printf("3- Quitter le programme\n");
         printf("Votre choix: ");
         scanf("%d", &choix);
         getchar();  //consomme le caractere de nouvelle ligne
@@ -133,9 +159,13 @@ int main() {
                 break;
             }
 
+            case 2:
+                afficherFichierTOV(&fichier);
+                break;
 
 
-            case 2: //quitter
+
+            case 3: //quitter
                 libererFichierTOV(&fichier);
                 return 0;
 
