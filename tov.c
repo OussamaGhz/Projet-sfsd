@@ -29,7 +29,21 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 }
 
 
-//liberation du fichierTOV soon
+//liberation du fichier TOv
+void libererFichierTOV(FichierTOV *fichier) {
+    //verifier si le fichier est null
+    if (fichier == NULL) {
+        printf("libererFichierTOV: fichier est NULL\n");
+        return;
+    }
+    //si le fichier n'est pas null en le libere et reset de tout les champs concernant les enregistrement
+    free(fichier->enregistrements);
+    fichier->enregistrements = NULL;
+    fichier->entete.nbEnregistrements = 0;
+
+    printf("libererFichierTOV: memoire liberer\n");
+}
+
 
 
 //la fonction retourne un TRUE si l'ajout est reussi et false sinon , simple concept
@@ -70,23 +84,67 @@ bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregist
 //1er test fonction suppression /soon
 
 
-//utiliser la fonction dans main
-//we cant use le programme yet car j'ai pas utiliser l'initialisation du fichier dans main /soon
+
+
+
+
+//utiliser les fonctions dans main
 int main() {
+    //explication des variables
     FichierTOV fichier;
     BufferTransmission buffer;
     int choix, id, capaciteFichier;
+    //id sera utiliser dans bcp de fonctions dans le future
     char data[TAILLE_BUFFER];
     EnregistrementPhysique newEnregistrement;
 
-    printf("Entrez les données de l'enregistrement:\n");
-    printf("data1: ");
-    fgets(newEnregistrement.data1, TAILLE_MAX_ENREGISTREMENT, stdin);
-    newEnregistrement.data1[strcspn(newEnregistrement.data1, "\n")] = '\0';
+    printf("Entrez la capacité maximale du fichier TOV: ");
+    scanf("%d", &capaciteFichier);
+    getchar();  //consomme le caractre de nouvelle ligne apr la lecture d'un nombre
+    initialiserFichierTOV(&fichier, capaciteFichier);
 
-    if (ajouterEnregistrement(&fichier, &newEnregistrement)) {
-        printf("Enregistrement ajouté avec succès.\n");
-    } else {
-        printf("Erreur lors de l'ajout de l'enregistrement.\n");
+
+    while(1)
+    {
+        printf("\nChoisissez une operation:\n");
+        printf("1- Ajouter un enregistrement\n");
+        printf("2- Quitter le programme\n");
+        printf("Votre choix: ");
+        scanf("%d", &choix);
+        getchar();  //consomme le caractere de nouvelle ligne
+        
+        //1st try of switch case:
+        switch(choix)
+        {
+
+
+            case 1:{
+                printf("Entrez les données de l'enregistrement:\n");
+                printf("data1: ");
+                fgets(newEnregistrement.data1, TAILLE_MAX_ENREGISTREMENT, stdin);
+                newEnregistrement.data1[strcspn(newEnregistrement.data1, "\n")] = '\0';
+
+                if (ajouterEnregistrement(&fichier, &newEnregistrement)){
+                    printf("Enregistrement ajouté avec succès.\n");
+                }
+                else{
+                    printf("Erreur lors de l'ajout de l'enregistrement.\n");
+                }
+                break;
+            }
+
+
+
+            case 2: //quitter
+                libererFichierTOV(&fichier);
+                return 0;
+
+            default:
+                printf("choix non valide. enter again\n");
+        
+
+        }
+
     }
+    return 0;
 }
