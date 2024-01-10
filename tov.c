@@ -112,15 +112,55 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
     GtkWidget *second_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "second_name_entry"));
     GtkWidget *id_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_entry"));
 
+    GtkWidget *first_name_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_first_name_error"));
+    GtkWidget *second_name_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_second_name_error"));
+    GtkWidget *id_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_id_error"));
+
     const char *first_name = gtk_editable_get_text(GTK_EDITABLE(first_name_entry));
     const char *second_name = gtk_editable_get_text(GTK_EDITABLE(second_name_entry));
     const char *id_text = gtk_editable_get_text(GTK_EDITABLE(id_entry));
+
+    // Form validation
+    if (strlen(first_name) == 0)
+    {
+        gtk_widget_set_visible(first_name_error_label, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(first_name_error_label, FALSE);
+    }
+
+    if (strlen(second_name) == 0)
+    {
+        gtk_widget_set_visible(second_name_error_label, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(second_name_error_label, FALSE);
+    }
+
+    if (strlen(id_text) == 0)
+    {
+        gtk_widget_set_visible(id_error_label, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(id_error_label, FALSE);
+    }
+
+    printf("First Name: %s\n", first_name);
+    printf("Second Name: %s\n", second_name);
+    printf("ID: %s\n", id_text);
 
     // Additional logic...
     // You can proceed with the confirmation logic here
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window, FALSE);
+
     // Free the builder
     g_object_unref(builder);
 }
