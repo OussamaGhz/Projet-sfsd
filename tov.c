@@ -1,5 +1,6 @@
 #include "tov.h"
 
+/*                                                            *  DONE  BY JINX  *                                                        */
 //initialisation du fichierTOV
 void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 
@@ -80,6 +81,62 @@ bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregist
     return true;
 }
 
+//too much work , explication apres , la fonction marche tres bien pas la peine de la modifier :)
+//supprimer un enregistrement specified with his ID du fichier TOV:
+bool supprimerEnregistrement(FichierTOV *fichier, int id) {
+
+    const char *nomFichier = "monFichierTOV.tov";
+    //cree et open un fichier temporaire pour stocker temporairement les enregistrements qui ne sont pas supprimes.
+    const char *nomFichierTemp = "tempFichierTOV.tov";
+
+    if (fichier == NULL) return false;
+
+    FILE *fichierPhysique = fopen(nomFichier, "r");
+    FILE *fichierTemp = fopen(nomFichierTemp, "w");
+
+    if (fichierPhysique == NULL || fichierTemp == NULL) {
+        if (fichierPhysique != NULL) fclose(fichierPhysique);
+        if (fichierTemp != NULL) fclose(fichierTemp);
+        return false;
+    }
+
+    char ligne[1024];
+    EnregistrementPhysique temp;
+    bool found = false;
+    int indexFound = -1;
+
+    for (int i = 0; fgets(ligne, sizeof(ligne), fichierPhysique) != NULL; ++i) {
+        sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
+        if (temp.entete.id != id) {
+            fputs(ligne, fichierTemp);
+        } else {
+            found = true;
+            indexFound = i;
+        }
+    }
+
+    fclose(fichierPhysique);
+    fclose(fichierTemp);
+
+    if (found) {
+        //remplace l'ancien fichier par le nouveau
+        remove(nomFichier);
+        rename(nomFichierTemp, nomFichier);
+
+        //mettre à jour la structure en memoire
+        for (int i = indexFound; i < fichier->entete.nbEnregistrements - 1; ++i) {
+            fichier->enregistrements[i] = fichier->enregistrements[i + 1];
+        }
+        fichier->entete.nbEnregistrements--;
+
+        memset(&fichier->enregistrements[fichier->entete.nbEnregistrements], 0, sizeof(EnregistrementPhysique));
+    } else {
+        remove(nomFichierTemp);
+    }
+
+    return found;
+}
+
 
 //fonction pour afficher le contenue de fichier:
 void afficherFichierTOV(const FichierTOV *fichier) {
@@ -111,7 +168,6 @@ void viderBuffer(BufferTransmission *buffer) {
 }
 
 
-
 //Le programme a un probleme avec le fichier physique , nriglih omba3d
 //utiliser les fonctions dans main
 int main() {
@@ -133,8 +189,9 @@ int main() {
     {
         printf("\nChoisissez une operation:\n");
         printf("1- Ajouter un enregistrement\n");
-        printf("2- Afficher le contenu du fichier\n");
-        printf("3- Quitter le programme\n");
+        printf("2- Supprimer un enregistrement\n"); //adding it to the switch case;
+        printf("3- Afficher le contenu du fichier\n");
+        printf("4- Quitter le programme\n");
         printf("Votre choix: ");
         scanf("%d", &choix);
         getchar();  //consomme le caractere de nouvelle ligne
@@ -159,13 +216,24 @@ int main() {
                 break;
             }
 
-            case 2:
+            case 2:  //supprimer un enregistrement
+                printf("Entrez l'ID de l'enregistrement à supprimer: ");
+                scanf("%d", &id);
+                getchar();
+                if (supprimerEnregistrement(&fichier, id)) {
+                    printf("Enregistrement supprime\n");
+                } else {
+                    printf("Enregistrement non trouve.\n");
+                }
+                break;
+
+            case 3:
                 afficherFichierTOV(&fichier);
                 break;
 
 
 
-            case 3: //quitter
+            case 4: //quitter
                 libererFichierTOV(&fichier);
                 return 0;
 
