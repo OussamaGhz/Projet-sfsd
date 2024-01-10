@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="4.0"/>
+  <requires lib="gtk+" version="4.0" />
   <object class="GtkWindow" id="main_window">
     <property name="title">File Manager</property>
-    <property name="default-width">900</property> <!-- Adjust width as needed -->
-    <property name="default-height">550</property> <!-- Set between 500 and 600 -->
+    <property name="default-width">900</property>    <!-- Adjust width as needed -->
+    <property name="default-height">550</property>    <!-- Set between 500 and 600 -->
     <child>
       <object class="GtkBox" id="vbox_main">
         <property name="orientation">vertical</property>
@@ -25,6 +25,13 @@
           <!-- Horizontal Box for buttons -->
           <object class="GtkBox" id="hbox_buttons">
             <property name="homogeneous">true</property>
+            <child>
+              <object class="GtkButton" id="button_create">
+                <property name="label">Create</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+              </object>
+            </child>
             <child>
               <object class="GtkButton" id="button_add">
                 <property name="label">Add</property>
@@ -63,29 +70,30 @@
     <property name="title">Add Item</property>
     <property name="modal">True</property>
     <child>
-      <placeholder/>
+      <placeholder />
     </child>
     <child>
       <object class="GtkBox" id="modal_box">
         <property name="orientation">vertical</property>
-        <property name="spacing">10</property> <!-- Add spacing between elements -->
-        <property name="margin-start">10</property> <!-- Add margin to the left -->
-        <property name="margin-end">10</property> <!-- Add margin to the right -->
+        <property name="spacing">10</property>        <!-- Add spacing between elements -->
+        <property name="margin-start">10</property>        <!-- Add margin to the left -->
+        <property name="margin-end">10</property>        <!-- Add margin to the right -->
         <child>
           <object class="GtkLabel" id="first_name_label">
             <property name="label">Enter first name:</property>
           </object>
         </child>
         <child>
-          <object class="GtkEntry" id="first_name_entry"/>
+          <object class="GtkEntry" id="first_name_entry" />
         </child>
         <child>
           <!-- Error label for first name -->
           <object class="GtkLabel" id="label_first_name_error">
-            <property name="label" translatable="yes">First name cannot be empty</property>
+            <property name="label" translatable="yes">Invalid input format</property>
             <property name="visible">False</property>
             <property name="xalign">0</property>
-            <property name="margin-start">10</property> <!-- Add margin to the left of the error label -->
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
           </object>
         </child>
         <child>
@@ -94,15 +102,16 @@
           </object>
         </child>
         <child>
-          <object class="GtkEntry" id="second_name_entry"/>
+          <object class="GtkEntry" id="second_name_entry" />
         </child>
         <child>
           <!-- Error label for second name -->
           <object class="GtkLabel" id="label_second_name_error">
-            <property name="label" translatable="yes">Second name cannot be empty</property>
+            <property name="label" translatable="yes">Invalid input format</property>
             <property name="visible">False</property>
             <property name="xalign">0</property>
-            <property name="margin-start">10</property> <!-- Add margin to the left of the error label -->
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
           </object>
         </child>
         <child>
@@ -111,19 +120,77 @@
           </object>
         </child>
         <child>
-          <object class="GtkEntry" id="id_entry"/>
+          <object class="GtkEntry" id="id_entry" />
         </child>
         <child>
           <!-- Error label for ID -->
           <object class="GtkLabel" id="label_id_error">
-            <property name="label" translatable="yes">Invalid ID format</property>
+            <property name="label" translatable="yes">Invalid input format</property>
             <property name="visible">False</property>
             <property name="xalign">0</property>
-            <property name="margin-start">10</property> <!-- Add margin to the left of the error label -->
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
           </object>
         </child>
         <child>
           <object class="GtkButton" id="button_confirm">
+            <property name="label">Confirm</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <object class="GtkDialog" id="information_modal">
+    <property name="title">Add Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder />
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box_2">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>        <!-- Add spacing between elements -->
+        <property name="margin-start">10</property>        <!-- Add margin to the left -->
+        <property name="margin-end">10</property>        <!-- Add margin to the right -->
+        <child>
+          <object class="GtkLabel" id="length_label">
+            <property name="label">Enter the file length:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="length_entry" />
+        </child>
+        <child>
+          <!-- Error label for first name -->
+          <object class="GtkLabel" id="label_length_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="buffer_label">
+            <property name="label">Enter Buffer length:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="buffer_entry" />
+        </child>
+        <child>
+          <!-- Error label for second name -->
+          <object class="GtkLabel" id="label_buffer_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm_create">
             <property name="label">Confirm</property>
           </object>
         </child>

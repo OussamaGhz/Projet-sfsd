@@ -1,14 +1,17 @@
 #include <gtk/gtk.h>
 #include <glib.h>
+#include <ctype.h>
 
 #include "tov.h"
 
 // Forward declarations of signal handlers
+void on_button_create_clicked(GtkButton *button, gpointer user_data);
 void on_button_add_clicked(GtkButton *button, gpointer user_data);
 void on_button_delete_clicked(GtkButton *button, gpointer user_data);
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data);
 void on_button_modify_content_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data);
+void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data);
 
 // to delete
 typedef struct
@@ -27,7 +30,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkBuilder *builder;
     GtkWidget *window;
     GtkWidget *modal_window;
-    GtkWidget *button_add, *button_delete, *button_show_content, *button_modify_content, *button_confirm;
+    GtkWidget *modal_window_inf;
+    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_modify_content, *button_confirm, *button_confirm_create;
 
     // Initialize your TOV file (replace with actual initialization)
     FichierTOV *fichier = g_malloc(sizeof(FichierTOV));
@@ -38,12 +42,15 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     // Get the main window and buttons from the builder
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
+    button_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_create"));
     button_add = GTK_WIDGET(gtk_builder_get_object(builder, "button_add"));
     button_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_delete"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_show_content"));
     button_modify_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_modify_content"));
+    button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
+    button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
 
-    if (!window || !button_add || !button_delete || !button_show_content || !button_modify_content || !button_confirm)
+    if (!window || !button_create || !button_add || !button_delete || !button_show_content || !button_modify_content || !button_confirm || !button_confirm_create)
     {
         g_printerr("Failed to fetch widgets from the Glade file\n");
         g_object_unref(builder);
@@ -54,16 +61,19 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_set_application(GTK_WINDOW(window), app);
 
     // Connect signals
+    g_signal_connect(button_create, "clicked", G_CALLBACK(on_button_create_clicked), window);
     g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), window);
     g_signal_connect(button_delete, "clicked", G_CALLBACK(on_button_delete_clicked), fichier);
     g_signal_connect(button_show_content, "clicked", G_CALLBACK(on_button_show_content_clicked), fichier);
     g_signal_connect(button_modify_content, "clicked", G_CALLBACK(on_button_modify_content_clicked), fichier);
 
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
+    button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
 
     modal_window = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_modal"));
+    modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
 
-    if (!modal_window)
+    if (!modal_window || !modal_window_inf)
     {
         g_printerr("Failed to fetch modal window from the Glade file\n");
         g_object_unref(builder);
@@ -72,6 +82,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     // Set the modal window for the "Confirm" button
     g_signal_connect(button_confirm, "clicked", G_CALLBACK(on_button_confirm_clicked), modal_window);
+    g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), modal_window_inf);
 
     // Show the main window
     gtk_window_present(GTK_WINDOW(window));
@@ -81,6 +92,31 @@ static void activate(GtkApplication *app, gpointer user_data)
 }
 
 // Signal handler for the "Add" button
+void on_button_create_clicked(GtkButton *button, gpointer user_data)
+{
+    printf("Create button was clicked\n");
+
+    // Declare the modal and confirm button locally
+    GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
+    GtkWidget *modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
+    GtkWidget *button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
+
+    // Set parent window for the modal
+    GtkWindow *parent_window = GTK_WINDOW(user_data);
+
+    // Corrected variable name: use modal_window_inf instead of information_modal
+    gtk_window_set_transient_for(GTK_WINDOW(modal_window_inf), parent_window);
+
+    // Set the modal window for the "Confirm" button
+    g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), builder);
+
+    // Present the modal window using gtk_window_present
+    gtk_window_present(GTK_WINDOW(modal_window_inf));
+
+    // Release the builder
+    // g_object_unref(builder);
+}
+
 void on_button_add_clicked(GtkButton *button, gpointer user_data)
 {
     printf("Add button was clicked\n");
@@ -103,6 +139,80 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
     // Release the builder
     // g_object_unref(builder);
 }
+void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
+{
+    GtkBuilder *builder = GTK_BUILDER(user_data);
+
+    GtkWidget *modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
+    GtkWidget *length_entry = GTK_WIDGET(gtk_builder_get_object(builder, "length_entry"));
+    GtkWidget *buffer_entry = GTK_WIDGET(gtk_builder_get_object(builder, "buffer_entry"));
+
+    GtkWidget *length_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_length_error"));
+    GtkWidget *buffer_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_buffer_error"));
+
+    const char *length_text = gtk_editable_get_text(GTK_EDITABLE(length_entry));
+    const char *buffer_text = gtk_editable_get_text(GTK_EDITABLE(buffer_entry));
+
+    // Form validation
+    if (strlen(length_text) == 0)
+    {
+        gtk_widget_set_visible(length_error_label, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(length_error_label, FALSE);
+
+        // Additional validation: Check if the input is a number
+        for (int i = 0; length_text[i] != '\0'; i++)
+        {
+            if (!isdigit(length_text[i]))
+            {
+                // If not a number, show error label and return
+                gtk_widget_set_visible(length_error_label, TRUE);
+                return;
+            }
+        }
+    }
+
+    if (strlen(buffer_text) == 0)
+    {
+        gtk_widget_set_visible(buffer_error_label, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(buffer_error_label, FALSE);
+
+        // Additional validation: Check if the input is a number
+        for (int i = 0; buffer_text[i] != '\0'; i++)
+        {
+            if (!isdigit(buffer_text[i]))
+            {
+                // If not a number, show error label and return
+                gtk_widget_set_visible(buffer_error_label, TRUE);
+                return;
+            }
+        }
+    }
+
+    // If it passes both checks, hide the error labels
+    gtk_widget_set_visible(length_error_label, FALSE);
+    gtk_widget_set_visible(buffer_error_label, FALSE);
+
+    printf("Length: %s\n", length_text);
+    printf("Buffer: %s\n", buffer_text);
+
+    // Additional logic...
+    // You can proceed with the confirmation logic here
+
+    // Hide the modal window after confirming
+    gtk_widget_set_visible(modal_window_inf, FALSE);
+
+    // Free the builder
+    g_object_unref(builder);
+}
+
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
 {
     GtkBuilder *builder = GTK_BUILDER(user_data);
@@ -148,6 +258,20 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
     }
     else
     {
+        gtk_widget_set_visible(id_error_label, FALSE);
+
+        // Additional validation: Check if the input is a number
+        for (int i = 0; id_text[i] != '\0'; i++)
+        {
+            if (!isdigit(id_text[i]))
+            {
+                // If not a number, show error label and return
+                gtk_widget_set_visible(id_error_label, TRUE);
+                return;
+            }
+        }
+
+        // If it passes both checks, hide the error label
         gtk_widget_set_visible(id_error_label, FALSE);
     }
 
