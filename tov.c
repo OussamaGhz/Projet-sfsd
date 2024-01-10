@@ -168,6 +168,14 @@ void viderBuffer(BufferTransmission *buffer) {
 }
 
 
+//une fonction pas demandee , j vais l'utiliser juste pour calculer la taille des diff enregistrements
+unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregistrement) {
+    if (enregistrement == NULL) return 0;
+
+    return sizeof(EnteteEnregistrement) + strlen(enregistrement->data1);
+}
+
+
 //Le programme a un probleme avec le fichier physique , nriglih omba3d
 //utiliser les fonctions dans main
 int main() {
@@ -190,8 +198,9 @@ int main() {
         printf("\nChoisissez une operation:\n");
         printf("1- Ajouter un enregistrement\n");
         printf("2- Supprimer un enregistrement\n"); //adding it to the switch case;
-        printf("3- Afficher le contenu du fichier\n");
-        printf("4- Quitter le programme\n");
+        printf("3- Calculer la taille d'un enregistrement\n");
+        printf("4- Afficher le contenu du fichier\n");
+        printf("5- Quitter le programme\n");
         printf("Votre choix: ");
         scanf("%d", &choix);
         getchar();  //consomme le caractere de nouvelle ligne
@@ -227,13 +236,19 @@ int main() {
                 }
                 break;
 
-            case 3:
+
+            //case 3:  //calculer la taille d'un enregistrement , simple concept mais
+                       //je veux la faire avec la fonction de rechercherEnregistrement
+               
+
+
+            case 4:
                 afficherFichierTOV(&fichier);
                 break;
 
 
 
-            case 4: //quitter
+            case 5: //quitter
                 libererFichierTOV(&fichier);
                 return 0;
 
