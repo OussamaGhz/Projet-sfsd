@@ -1,4 +1,6 @@
 #include <gtk/gtk.h>
+#include <glib.h>
+
 #include "tov.h"
 
 // Forward declarations of signal handlers
@@ -93,50 +95,34 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
     gtk_window_set_transient_for(GTK_WINDOW(modal_window), parent_window);
 
     // Set the modal window for the "Confirm" button
-    g_signal_connect(confirm_button, "clicked", G_CALLBACK(on_button_confirm_clicked), modal_window);
+    g_signal_connect(confirm_button, "clicked", G_CALLBACK(on_button_confirm_clicked), builder);
 
     // Present the modal window using gtk_window_present
     gtk_window_present(GTK_WINDOW(modal_window));
 
     // Release the builder
-    g_object_unref(builder);
+    // g_object_unref(builder);
 }
-
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
 {
-    // gtk_button_set_label(GTK_BUTTON(_button_confirm), "Clicked!");
-    // GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
-    // GtkWidget *modal_window = GTK_WIDGET(user_data);
-    // GtkWidget *first_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "first_name_label"));
-    // GtkWidget *second_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "second_name_label"));
-    // GtkWidget *id_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_label"));
+    GtkBuilder *builder = GTK_BUILDER(user_data);
 
-    // const char *first_name = gtk_entry_get_text(GTK_ENTRY(first_name_label));
-    // const char *second_name = gtk_entry_get_text(GTK_ENTRY(second_name_label));
-    // const char *id_text = gtk_entry_get_text(GTK_ENTRY(id_label));
+    GtkWidget *modal_window = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_modal"));
+    GtkWidget *first_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "first_name_entry"));
+    GtkWidget *second_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "second_name_entry"));
+    GtkWidget *id_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_entry"));
 
-    // // Validate the input fields
-    // if (strlen(first_name) == 0 || strlen(second_name) == 0 || strlen(id_text) == 0)
-    // {
-    //     // Display an error message if any of the fields is empty
-    //     GtkWidget *error_dialog = gtk_message_dialog_new(GTK_WINDOW(modal_window),
-    //                                                      GTK_DIALOG_MODAL,
-    //                                                      GTK_MESSAGE_ERROR,
-    //                                                      GTK_BUTTONS_OK,
-    //                                                      "All fields must be filled!");
-    //     gtk_dialog_run(GTK_DIALOG(error_dialog));
-    //     gtk_widget_destroy(error_dialog);
-    //     return;
-    // }
+    const char *first_name = gtk_editable_get_text(GTK_EDITABLE(first_name_entry));
+    const char *second_name = gtk_editable_get_text(GTK_EDITABLE(second_name_entry));
+    const char *id_text = gtk_editable_get_text(GTK_EDITABLE(id_entry));
 
-    // // Convert ID to integer (assuming it's a number)
-    // int id = atoi(id_text);
+    // Additional logic...
+    // You can proceed with the confirmation logic here
 
-    // // Additional logic...
-    // // You can proceed with the confirmation logic here
-
-    // // Hide the modal window after confirming
-    // gtk_widget_hide(modal_window);
+    // Hide the modal window after confirming
+    gtk_widget_set_visible(modal_window, FALSE);
+    // Free the builder
+    g_object_unref(builder);
 }
 
 void on_button_modify_content_clicked(GtkButton *button, gpointer user_data)
