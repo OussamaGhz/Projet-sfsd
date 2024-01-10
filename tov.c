@@ -104,10 +104,39 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
 
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
 {
-    GtkWidget *modal_window = GTK_WIDGET(user_data);
-    printf("Confirm button was clicked\n");
-    // Additional logic...
-    // gtk_widget_hide(modal_window);  // Hide the modal window after confirming
+    // gtk_button_set_label(GTK_BUTTON(_button_confirm), "Clicked!");
+    // GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
+    // GtkWidget *modal_window = GTK_WIDGET(user_data);
+    // GtkWidget *first_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "first_name_label"));
+    // GtkWidget *second_name_entry = GTK_WIDGET(gtk_builder_get_object(builder, "second_name_label"));
+    // GtkWidget *id_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_label"));
+
+    // const char *first_name = gtk_entry_get_text(GTK_ENTRY(first_name_label));
+    // const char *second_name = gtk_entry_get_text(GTK_ENTRY(second_name_label));
+    // const char *id_text = gtk_entry_get_text(GTK_ENTRY(id_label));
+
+    // // Validate the input fields
+    // if (strlen(first_name) == 0 || strlen(second_name) == 0 || strlen(id_text) == 0)
+    // {
+    //     // Display an error message if any of the fields is empty
+    //     GtkWidget *error_dialog = gtk_message_dialog_new(GTK_WINDOW(modal_window),
+    //                                                      GTK_DIALOG_MODAL,
+    //                                                      GTK_MESSAGE_ERROR,
+    //                                                      GTK_BUTTONS_OK,
+    //                                                      "All fields must be filled!");
+    //     gtk_dialog_run(GTK_DIALOG(error_dialog));
+    //     gtk_widget_destroy(error_dialog);
+    //     return;
+    // }
+
+    // // Convert ID to integer (assuming it's a number)
+    // int id = atoi(id_text);
+
+    // // Additional logic...
+    // // You can proceed with the confirmation logic here
+
+    // // Hide the modal window after confirming
+    // gtk_widget_hide(modal_window);
 }
 
 void on_button_modify_content_clicked(GtkButton *button, gpointer user_data)

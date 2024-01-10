@@ -4,8 +4,8 @@
   <requires lib="gtk+" version="4.0"/>
   <object class="GtkWindow" id="main_window">
     <property name="title">File Manager</property>
-    <property name="default-width">600</property>
-    <property name="default-height">400</property>
+    <property name="default-width">900</property> <!-- Adjust width as needed -->
+    <property name="default-height">550</property> <!-- Set between 500 and 600 -->
     <child>
       <object class="GtkBox" id="vbox_main">
         <property name="orientation">vertical</property>
@@ -15,7 +15,7 @@
           <!-- Label for displaying content -->
           <object class="GtkLabel" id="label_content">
             <property name="width-request">580</property>
-            <property name="height-request">600</property>
+            <property name="height-request">550</property>
             <property name="visible">True</property>
             <property name="label">[Content will be displayed here]</property>
             <property name="wrap">true</property>
@@ -28,29 +28,29 @@
             <child>
               <object class="GtkButton" id="button_add">
                 <property name="label">Add</property>
-                <property name="width-request">150</property> <!-- Increase width -->
-                <property name="height-request">100</property> <!-- Increase height -->
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="button_delete">
                 <property name="label">Delete</property>
-                <property name="width-request">150</property> <!-- Increase width -->
-                <property name="height-request">100</property> <!-- Increase height -->
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="button_show_content">
                 <property name="label">Show Content</property>
-                <property name="width-request">150</property> <!-- Increase width -->
-                <property name="height-request">100</property> <!-- Increase height -->
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="button_modify_content">
                 <property name="label">Modify Content</property>
-                <property name="width-request">150</property> <!-- Increase width -->
-                <property name="height-request">100</property> <!-- Increase height -->
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
               </object>
             </child>
           </object>
@@ -63,48 +63,41 @@
     <property name="title">Add Item</property>
     <property name="modal">True</property>
     <child>
-        <placeholder/>
+      <placeholder/>
     </child>
     <child>
-        <object class="GtkBox" id="modal_box">
-            <property name="orientation">vertical</property>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-top">10</property>
-            <property name="margin-bottom">10</property>
-            <child>
-                <object class="GtkLabel" id="first_name_label">
-                    <property name="label">Enter first name:</property>
-                </object>
-            </child>
-            <child>
-                <object class="GtkEntry" id="first_name_entry"/>
-            </child>
-            <child>
-                <object class="GtkLabel" id="second_name_label">
-                    <property name="label">Enter second name:</property>
-                    <property name="margin-top">10</property>
-                </object>
-            </child>
-            <child>
-                <object class="GtkEntry" id="second_name_entry"/>
-            </child>
-            <child>
-                <object class="GtkLabel" id="id_label">
-                    <property name="label">Enter ID (numbers only):</property>
-                    <property name="margin-top">10</property>
-                </object>
-            </child>
-            <child>
-                <object class="GtkEntry" id="id_entry"/>
-            </child>
-            <child>
-                <object class="GtkButton" id="button_confirm">
-                    <property name="label">Confirm</property>
-                    <property name="margin-top">20</property>
-                </object>
-            </child>
-        </object>
+      <object class="GtkBox" id="modal_box">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="first_name_label">
+            <property name="label">Enter first name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="first_name_entry"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="second_name_label">
+            <property name="label">Enter second name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="second_name_entry"/>
+        </child>
+        <child>
+          <object class="GtkLabel" id="id_label">
+            <property name="label">Enter ID (numbers only):</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="id_entry"/>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm">
+            <property name="label">Confirm</property>
+          </object>
+        </child>
+      </object>
     </child>
-</object>
+  </object>
 </interface>
