@@ -42,9 +42,8 @@ typedef struct {
 // Structure du fichier
 typedef struct {
     EnteteFichierTOV entete;
-    EnregistrementPhysique[MAX_ENREGISTREMENTS] enregistrements;
+    EnregistrementPhysique enregistrements[MAX_ENREGISTREMENTS];
 } FichierTOV;
-
 
 
 #endif
