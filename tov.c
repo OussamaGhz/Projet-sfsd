@@ -137,6 +137,32 @@ bool supprimerEnregistrement(FichierTOV *fichier, int id) {
     return found;
 }
 
+//fonction de recherche des enregistrements avec le id dans le fichier
+//implementation dans main apres
+EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id) {
+    const char *nomFichier = "monFichierTOV.tov";
+    if (fichier == NULL) return NULL;
+
+    FILE *fichierPhysique = fopen(nomFichier, "r");
+    if (fichierPhysique == NULL) return NULL;
+
+    EnregistrementPhysique *trouve = NULL;
+    EnregistrementPhysique temp;
+    char ligne[1024];//taille suffisante normalement
+
+    while (fgets(ligne, sizeof(ligne), fichierPhysique) != NULL) {
+        sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
+        if (temp.entete.id == id) {
+            trouve = malloc(sizeof(EnregistrementPhysique));
+            *trouve = temp;
+            break;
+        }
+    }
+
+    fclose(fichierPhysique);
+    return trouve;
+}
+
 
 //fonction pour afficher le contenue de fichier:
 void afficherFichierTOV(const FichierTOV *fichier) {
@@ -239,7 +265,6 @@ int main() {
 
             //case 3:  //calculer la taille d'un enregistrement , simple concept mais
                        //je veux la faire avec la fonction de rechercherEnregistrement
-               
 
 
             case 4:
