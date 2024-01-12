@@ -24,12 +24,16 @@ typedef struct {
 
 
 //j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
-
 typedef struct {
     EnteteEnregistrement entete;
     char data1[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
 
+//structure de hashage
+typedef struct {
+    EnregistrementPhysique **table;
+    int taille;
+}HashTable;
 
 typedef struct {
     int nbEnregistrements;
@@ -64,7 +68,7 @@ bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregist
 bool supprimerEnregistrement(FichierTOV *fichier, int id);
 
 //Verifiez si fichier n'est pas NULL
-EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id);
+EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id); //a regler d'apres la nouvelle fonction de recherche
 
 //Verifiez si fichier n'est pas NULL
 void afficherFichierTOV(const FichierTOV *fichier);

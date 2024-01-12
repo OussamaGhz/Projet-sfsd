@@ -1,6 +1,21 @@
 #include "tov.h"
 
 /*                                                            *  DONE  BY JINX  *                                                        */
+
+
+//simple fonction pour initialiser la table de hashage 
+void initialiserHashTable(HashTable *hashTable, int taille) {
+    hashTable->table = malloc(taille * sizeof(EnregistrementPhysique*));
+    for (int i = 0; i < taille; i++) {
+        hashTable->table[i] = NULL;
+    }
+    hashTable->taille = taille;
+}
+
+int hashFunction(int id, int tailleTable) {
+    return id % tailleTable;
+}
+
 //initialisation du fichierTOV
 void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 
@@ -27,6 +42,7 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
     //affichage de reussite de initialisation et initialisation de nextID à 0
     printf("initialiserFichierTOV: initialization successful\n");
     fichier->entete.nextID = 0;
+
 }
 
 
@@ -137,31 +153,22 @@ bool supprimerEnregistrement(FichierTOV *fichier, int id) {
     return found;
 }
 
-//fonction de recherche des enregistrements avec le id dans le fichier
-//implementation dans main apres
-EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id) {
-    const char *nomFichier = "monFichierTOV.tov";
-    if (fichier == NULL) return NULL;
-
-    FILE *fichierPhysique = fopen(nomFichier, "r");
-    if (fichierPhysique == NULL) return NULL;
-
-    EnregistrementPhysique *trouve = NULL;
-    EnregistrementPhysique temp;
-    char ligne[1024];//taille suffisante normalement
-
-    while (fgets(ligne, sizeof(ligne), fichierPhysique) != NULL) {
-        sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
-        if (temp.entete.id == id) {
-            trouve = malloc(sizeof(EnregistrementPhysique));
-            *trouve = temp;
-            break;
-        }
+//changement complet de la fonction de recherche mais ya beaucouup de problemes a regler
+EnregistrementPhysique *rechercherEnregistrement(HashTable *hashTable, int id) {
+    if (hashTable == NULL) {
+        return NULL;
     }
 
-    fclose(fichierPhysique);
-    return trouve;
+    int index = hashFunction(id, hashTable->taille);
+
+    //verfier si l'enregistrement existe a cet index
+    if (hashTable->table[index] != NULL && hashTable->table[index]->entete.id == id) {
+        return hashTable->table[index];
+    }
+
+    return NULL;
 }
+
 
 
 //fonction pour afficher le contenue de fichier:
