@@ -17,7 +17,6 @@ typedef struct {
     int id;
     int tailleDonnees;
     int nbrEnregistrementLogique;
-    int nbrChampsLogique;
 } EnteteEnregistrement;
 
 //ensuite la structure du block
@@ -30,7 +29,9 @@ typedef struct {
 // on definie la structure de l'entete du fichier
 typedef struct {
     int nbEnregistrements;
-    int capaciteMax;
+    int nbrBlock;
+    int facteurdeblockage;
+    int nextId;
 } EnteteFichierTOV;
 
 // Structure du buffer
@@ -44,6 +45,21 @@ typedef struct {
     EnteteFichierTOV entete;
     EnregistrementPhysique enregistrements[MAX_ENREGISTREMENTS];
 } FichierTOV;
+
+typedef struct{
+ char nom[20];
+ char *prenom[5];
+ int matricule;
+ char filiere[20];
+}enregistrementLogique;
+
+typedef struct {
+  enregistrementLogique classe[MAX_ENREGISTREMENTS];
+  int nbrEnregistrementLogique;
+}fichierLogique;
+
+
+
 
 
 #endif

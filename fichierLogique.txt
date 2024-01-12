@@ -1,0 +1,23 @@
+nom: chabati
+prenom 1: rayan
+prenom 2: anis
+matricule: 4265336
+filiere: info
+nom: chabati
+prenom 1: rayan
+matricule: 452142
+filiere: info
+nom: chabati
+prenom 1: adel
+prenom 2: asel
+matricule: 415653
+filiere: info
+nom: chabati
+prenom 1: rayan
+matricule: 35142
+filiere: info
+nom: proba
+prenom 1: 3aryan
+prenom 2: hchahalna
+matricule: 317963
+filiere: proba
