@@ -29,11 +29,11 @@ typedef struct {
     char data1[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
 
-//structure de hashage
 typedef struct {
-    EnregistrementPhysique **table;
+    int *table;
     int taille;
-}HashTable;
+} HashTable;
+
 
 typedef struct {
     int nbEnregistrements;
@@ -62,13 +62,13 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 void libererFichierTOV(FichierTOV *fichier);
 
 //Verifiez si fichier et le Buffer ne sont pas NULL
-bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregistrement);
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement);
 
 //Verifiez si fichier n'est pas NULL
-bool supprimerEnregistrement(FichierTOV *fichier, int id);
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id);
 
 //Verifiez si fichier n'est pas NULL
-EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id); //a regler d'apres la nouvelle fonction de recherche
+EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id); //changed to fit the new function
 
 //Verifiez si fichier n'est pas NULL
 void afficherFichierTOV(const FichierTOV *fichier);
