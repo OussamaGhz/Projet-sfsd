@@ -65,45 +65,46 @@ void libererFichierTOV(FichierTOV *fichier) {
 
 
 
-//la fonction retourne un TRUE si l'ajout est reussi et false sinon , simple concept
+//reconstruction de la fonction ajouter enregistrement
 bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement) {
-
-    //en ajoutant cette linge de code , le probleme de id is fixed :)
-    enregistrement->entete.id = fichier->entete.nbEnregistrements;
-
-    const char *nomFichier = "monFichierTOV.tov";
 
     //verification si les 2 pointeurs sont NULL pour eviter des erreurs de segmentation
     if (fichier == NULL || enregistrement == NULL) return false;
 
-    FILE *fichierPhysique = fopen(nomFichier, "a"); // opening el file in mode append
-    if (fichierPhysique == NULL) return false; //to make sure beli el file is opened
+    const char *nomFichier = "monFichierTOV.tov";
 
-    // check la capacite maximale avant d'inserer
+    FILE *fichierPhysique = fopen(nomFichier, "a");
+    if (fichierPhysique == NULL) return false;
+
+     //check la capacite maximale avant d'inserer
     if (fichier->entete.nbEnregistrements >= fichier->entete.capaciteMax) {
         fclose(fichierPhysique);
         return false;
     }
 
-    enregistrement->entete.id = fichier->entete.nextID++; //new logique de id
+    //en ajoutant cette linge de code , le probleme de id is fixed :)
+    enregistrement->entete.id = fichier->entete.nextID++;
 
-    //j'ai utilise fprintf pour écrire les données de enregistrement dans le fichier , le format est %d | %s
-    fprintf(fichierPhysique, "%d|%s\n", enregistrement->entete.id, enregistrement->data1);
+    //ecrire les donnees de l'enregistrement dans le fichier
+    fprintf(fichierPhysique, "%d|%s|%s|%s\n",
+            enregistrement->entete.id,
+            enregistrement->data1,
+            enregistrement->data2,
+            enregistrement->data3);
 
-    //j'augmente le compteur nbEnregistrements quand j'ajoute l'enregistrement dans le tableau "enregistrements" de "fichier"
+    //ajouter l'enregistrement dans le tableau en memoire
     fichier->enregistrements[fichier->entete.nbEnregistrements] = *enregistrement;
     fichier->entete.nbEnregistrements++;
 
-    //ferméture du fichier
     fclose(fichierPhysique);
 
-    //Le but est de calculer un index dans la table de hachage ou cet enregistrement devrait etre found.
+    //mise à jour de la table de hashage
     int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille);
-    //met a jour la table de hachage à l'index calculated before
-    hashTable->table[indexHash] = enregistrement->entete.id; //ou l'index dans le tableau 'enregistrements'
-    
+    hashTable->table[indexHash] = enregistrement->entete.id;
+
     return true;
 }
+
 
 //too much work , explication apres , la fonction marche tres bien pas la peine de la modifier :)
 //supprimer un enregistrement specified with his ID du fichier TOV:
@@ -263,21 +264,31 @@ int main() {
         switch(choix)
         {
 
-
-            case 1:{
-                printf("Entrez les données de l'enregistrement:\n");
+            //changment dans le cas d'ajouter un enregistrement pour avoir 3 champs
+            case 1: {
+                printf("Entrez les donnees de l'enregistrement:\n");
                 printf("data1: ");
                 fgets(newEnregistrement.data1, TAILLE_MAX_ENREGISTREMENT, stdin);
                 newEnregistrement.data1[strcspn(newEnregistrement.data1, "\n")] = '\0';
 
+                printf("data2: ");
+                fgets(newEnregistrement.data2, TAILLE_MAX_ENREGISTREMENT, stdin);
+                newEnregistrement.data2[strcspn(newEnregistrement.data2, "\n")] = '\0';
+
+                printf("data3: ");
+                fgets(newEnregistrement.data3, TAILLE_MAX_ENREGISTREMENT, stdin);
+                newEnregistrement.data3[strcspn(newEnregistrement.data3, "\n")] = '\0';
+
                 if (ajouterEnregistrement(&fichier, &hashTable, &newEnregistrement)){
-                    printf("Enregistrement ajouté avec succès.\n");
+                    printf("Enregistrement ajoute avec succes\n");
                 }
                 else{
-                    printf("Erreur lors de l'ajout de l'enregistrement.\n");
+                    printf("Erreur lors de l'ajout de l'enregistrement\n");
                 }
                 break;
             }
+
+
 
             case 2:  //supprimer un enregistrement
                 printf("Entrez l'ID de l'enregistrement à supprimer: ");

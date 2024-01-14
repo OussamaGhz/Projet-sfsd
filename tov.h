@@ -23,11 +23,14 @@ typedef struct {
 } EnteteEnregistrement;
 
 
-//j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
+//adding new champs à l'enregistrement physique
 typedef struct {
     EnteteEnregistrement entete;
     char data1[TAILLE_MAX_ENREGISTREMENT];
+    char data2[TAILLE_MAX_ENREGISTREMENT];
+    char data3[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
+
 
 typedef struct {
     int *table;
