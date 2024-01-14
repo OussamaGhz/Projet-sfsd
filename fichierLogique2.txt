@@ -1,0 +1,17 @@
+nom: chabati
+prenom 1: rayan
+matricule: 235454
+filiere: info
+nom: chabati
+prenom 1: adel
+matricule: 55373
+filiere: info
+nom: chabati
+prenom 1: anis
+matricule: 3567
+filiere: info
+nom: chabati
+prenom 1: asel
+prenom 2: iop
+matricule: 24226
+filiere: compil
