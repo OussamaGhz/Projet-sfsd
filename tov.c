@@ -24,6 +24,12 @@ GtkWidget *button_add;
 GtkWidget *button_delete;
 GtkWidget *button_show_content;
 
+FichierTOV fichier;
+HashTable hashTable;
+BufferTransmission buffer;
+EnregistrementPhysique newEnregistrement;
+
+
 // Activation callback
 static void activate(GtkApplication *app, gpointer user_data)
 {
@@ -179,7 +185,6 @@ void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
     gtk_widget_set_visible(length_error_label, FALSE);
 
     // initilaise the folder after confirming
-    FichierTOV fichier;
     int capaciteFichier = atoi(length_text);
     initialiserFichierTOV(&fichier, capaciteFichier);
 
@@ -245,16 +250,15 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
             }
         }
 
-        EnregistrementPhysique newEnregistrement;
+        
 
         // If it passes both checks, hide the error label
         gtk_widget_set_visible(id_error_label, FALSE);
     }
 
-    FichierTOV fichier;
-    HashTable hashTable;
-    BufferTransmission buffer;
-    EnregistrementPhysique newEnregistrement;
+    
+    
+    
 
     strcpy(newEnregistrement.data1, first_name);
     strcpy(newEnregistrement.data2, second_name);
@@ -286,13 +290,11 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
 void on_button_quit_clicked(GtkButton *button, gpointer user_data)
 {
     printf("Confirm button was clicked\n");
-    FichierTOV fichier;
     libererFichierTOV(&fichier);
 }
 
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
 {
-    printf("Confirm button was clicked\n");
 }
 
 void on_button_delete_clicked(GtkButton *button, gpointer user_data)
@@ -351,15 +353,13 @@ void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data)
         gtk_widget_set_visible(id_error_label_delete, FALSE);
     }
 
-    FichierTOV fichier;
-    HashTable hashTable;
-    BufferTransmission buffer;
-    EnregistrementPhysique newEnregistrement;
+    
+    
+    
 
     int id = atoi(id_text_delete);
     supprimerEnregistrement(&fichier, &hashTable, id);
 
-    
     // If it passes both checks, hide the error labels
     gtk_widget_set_visible(id_error_label_delete, FALSE);
 
