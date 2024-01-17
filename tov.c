@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "tov.h"
 
@@ -9,20 +11,18 @@ void on_button_create_clicked(GtkButton *button, gpointer user_data);
 void on_button_add_clicked(GtkButton *button, gpointer user_data);
 void on_button_delete_clicked(GtkButton *button, gpointer user_data);
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data);
-void on_button_modify_content_clicked(GtkButton *button, gpointer user_data);
+void on_button_quit_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data);
+void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data);
 
-// to delete
-typedef struct
-{
-    char first_name[100];
-    char second_name[100];
-    char id[50];
-} PersonInfo;
+void initialiserHashTable(HashTable *hashTable, int taille);
 
-PersonInfo people[100]; // Array to hold information for up to 100 people
-int people_count = 0;   // Counter for the number of people added
+gboolean confirm_create_clicked = FALSE;
+
+GtkWidget *button_add;
+GtkWidget *button_delete;
+GtkWidget *button_show_content;
 
 // Activation callback
 static void activate(GtkApplication *app, gpointer user_data)
@@ -31,11 +31,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *window;
     GtkWidget *modal_window;
     GtkWidget *modal_window_inf;
-    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_modify_content, *button_confirm, *button_confirm_create;
+    GtkWidget *button_confirm_delete;
+    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create;
 
     // Initialize your TOV file (replace with actual initialization)
     FichierTOV *fichier = g_malloc(sizeof(FichierTOV));
-    initialiserFichierTOV(fichier, MAX_ENREGISTREMENTS);
 
     // Create a new builder from the Glade file
     builder = gtk_builder_new_from_file("design.glade");
@@ -46,11 +46,12 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_add = GTK_WIDGET(gtk_builder_get_object(builder, "button_add"));
     button_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_delete"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_show_content"));
-    button_modify_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_modify_content"));
+    button_quit = GTK_WIDGET(gtk_builder_get_object(builder, "button_quit"));
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
+    button_confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_delete"));
 
-    if (!window || !button_create || !button_add || !button_delete || !button_show_content || !button_modify_content || !button_confirm || !button_confirm_create)
+    if (!window || !button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete)
     {
         g_printerr("Failed to fetch widgets from the Glade file\n");
         g_object_unref(builder);
@@ -61,11 +62,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_set_application(GTK_WINDOW(window), app);
 
     // Connect signals
-    g_signal_connect(button_create, "clicked", G_CALLBACK(on_button_create_clicked), window);
-    g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), window);
-    g_signal_connect(button_delete, "clicked", G_CALLBACK(on_button_delete_clicked), fichier);
-    g_signal_connect(button_show_content, "clicked", G_CALLBACK(on_button_show_content_clicked), fichier);
-    g_signal_connect(button_modify_content, "clicked", G_CALLBACK(on_button_modify_content_clicked), fichier);
+    g_signal_connect(button_create, "clicked", G_CALLBACK(on_button_create_clicked), builder);
+    g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), builder);
+    g_signal_connect(button_delete, "clicked", G_CALLBACK(on_button_delete_clicked), builder);
+    g_signal_connect(button_show_content, "clicked", G_CALLBACK(on_button_show_content_clicked), builder);
+    g_signal_connect(button_quit, "clicked", G_CALLBACK(on_button_quit_clicked), builder);
 
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
@@ -81,8 +82,9 @@ static void activate(GtkApplication *app, gpointer user_data)
     }
 
     // Set the modal window for the "Confirm" button
-    g_signal_connect(button_confirm, "clicked", G_CALLBACK(on_button_confirm_clicked), modal_window);
-    g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), modal_window_inf);
+    g_signal_connect(button_confirm, "clicked", G_CALLBACK(on_button_confirm_clicked), builder);
+    g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), builder);
+    g_signal_connect(button_confirm_delete, "clicked", G_CALLBACK(on_button_confirm_delete_clicked), builder);
 
     // Show the main window
     gtk_window_present(GTK_WINDOW(window));
@@ -101,8 +103,8 @@ void on_button_create_clicked(GtkButton *button, gpointer user_data)
     GtkWidget *modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
     GtkWidget *button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
 
-    // Set parent window for the modal
-    GtkWindow *parent_window = GTK_WINDOW(user_data);
+    // Get the top-level parent window from the button widget using gtk_widget_get_ancestor
+    GtkWindow *parent_window = GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW));
 
     // Corrected variable name: use modal_window_inf instead of information_modal
     gtk_window_set_transient_for(GTK_WINDOW(modal_window_inf), parent_window);
@@ -127,7 +129,7 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
     GtkWidget *confirm_button = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
 
     // Set parent window for the modal
-    GtkWindow *parent_window = GTK_WINDOW(user_data);
+    GtkWindow *parent_window = GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW));
     gtk_window_set_transient_for(GTK_WINDOW(modal_window), parent_window);
 
     // Set the modal window for the "Confirm" button
@@ -141,17 +143,15 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
 }
 void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
 {
-    GtkBuilder *builder = GTK_BUILDER(user_data);
+    // Assuming user_data contains the main window's builder
+    GtkBuilder *main_builder = GTK_BUILDER(user_data);
 
-    GtkWidget *modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
-    GtkWidget *length_entry = GTK_WIDGET(gtk_builder_get_object(builder, "length_entry"));
-    GtkWidget *buffer_entry = GTK_WIDGET(gtk_builder_get_object(builder, "buffer_entry"));
+    GtkWidget *modal_window_inf = GTK_WIDGET(gtk_builder_get_object(main_builder, "information_modal"));
+    GtkWidget *length_entry = GTK_WIDGET(gtk_builder_get_object(main_builder, "length_entry"));
 
-    GtkWidget *length_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_length_error"));
-    GtkWidget *buffer_error_label = GTK_WIDGET(gtk_builder_get_object(builder, "label_buffer_error"));
+    GtkWidget *length_error_label = GTK_WIDGET(gtk_builder_get_object(main_builder, "label_length_error"));
 
     const char *length_text = gtk_editable_get_text(GTK_EDITABLE(length_entry));
-    const char *buffer_text = gtk_editable_get_text(GTK_EDITABLE(buffer_entry));
 
     // Form validation
     if (strlen(length_text) == 0)
@@ -175,42 +175,16 @@ void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
         }
     }
 
-    if (strlen(buffer_text) == 0)
-    {
-        gtk_widget_set_visible(buffer_error_label, TRUE);
-        return;
-    }
-    else
-    {
-        gtk_widget_set_visible(buffer_error_label, FALSE);
-
-        // Additional validation: Check if the input is a number
-        for (int i = 0; buffer_text[i] != '\0'; i++)
-        {
-            if (!isdigit(buffer_text[i]))
-            {
-                // If not a number, show error label and return
-                gtk_widget_set_visible(buffer_error_label, TRUE);
-                return;
-            }
-        }
-    }
-
     // If it passes both checks, hide the error labels
     gtk_widget_set_visible(length_error_label, FALSE);
-    gtk_widget_set_visible(buffer_error_label, FALSE);
 
-    printf("Length: %s\n", length_text);
-    printf("Buffer: %s\n", buffer_text);
-
-    // Additional logic...
-    // You can proceed with the confirmation logic here
+    // initilaise the folder after confirming
+    FichierTOV fichier;
+    int capaciteFichier = atoi(length_text);
+    initialiserFichierTOV(&fichier, capaciteFichier);
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window_inf, FALSE);
-
-    // Free the builder
-    g_object_unref(builder);
 }
 
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
@@ -271,27 +245,49 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
             }
         }
 
+        EnregistrementPhysique newEnregistrement;
+
         // If it passes both checks, hide the error label
         gtk_widget_set_visible(id_error_label, FALSE);
     }
 
-    printf("First Name: %s\n", first_name);
-    printf("Second Name: %s\n", second_name);
-    printf("ID: %s\n", id_text);
+    FichierTOV fichier;
+    HashTable hashTable;
+    BufferTransmission buffer;
+    EnregistrementPhysique newEnregistrement;
 
-    // Additional logic...
-    // You can proceed with the confirmation logic here
+    strcpy(newEnregistrement.data1, first_name);
+    strcpy(newEnregistrement.data2, second_name);
+    strcpy(newEnregistrement.data3, id_text);
+
+    if (ajouterEnregistrement(&fichier, &hashTable, &newEnregistrement))
+    {
+        printf("Enregistrement ajoute avec succes\n");
+        // Enable the "Add," "Delete," and "Show Content" buttons
+        gtk_widget_set_visible(button_add, TRUE);
+        gtk_widget_set_visible(button_delete, TRUE);
+        gtk_widget_set_visible(button_show_content, TRUE);
+    }
+    else
+    {
+        printf("Erreur lors de l'ajout de l'enregistrement\n");
+    }
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window, FALSE);
+
+    // Set confirm_create_clicked to TRUE
+    confirm_create_clicked = TRUE;
 
     // Free the builder
     g_object_unref(builder);
 }
 
-void on_button_modify_content_clicked(GtkButton *button, gpointer user_data)
+void on_button_quit_clicked(GtkButton *button, gpointer user_data)
 {
     printf("Confirm button was clicked\n");
+    FichierTOV fichier;
+    libererFichierTOV(&fichier);
 }
 
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
@@ -301,145 +297,263 @@ void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
 
 void on_button_delete_clicked(GtkButton *button, gpointer user_data)
 {
-    printf("Confirm button was clicked\n");
+    printf("Delete button was clicked\n");
+
+    // Declare the modal and confirm button locally
+    GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
+    GtkWidget *modal_window_delete = GTK_WIDGET(gtk_builder_get_object(builder, "delete_modal"));
+    GtkWidget *confirm_button_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_delete"));
+
+    // Set parent window for the modal
+    GtkWindow *parent_window = GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW));
+    gtk_window_set_transient_for(GTK_WINDOW(modal_window_delete), parent_window);
+
+    // Set the modal window for the "Confirm" button
+    g_signal_connect(confirm_button_delete, "clicked", G_CALLBACK(on_button_confirm_delete_clicked), builder);
+
+    // Present the modal window using gtk_window_present
+    gtk_window_present(GTK_WINDOW(modal_window_delete));
+
+    // Release the builder
+    // g_object_unref(builder);
+}
+
+void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data)
+{
+    // Assuming user_data contains the main window's builder
+    GtkBuilder *main_builder = GTK_BUILDER(user_data);
+
+    GtkWidget *modal_window_delete = GTK_WIDGET(gtk_builder_get_object(main_builder, "delete_modal"));
+    GtkWidget *id_entry_delete = GTK_WIDGET(gtk_builder_get_object(main_builder, "id_delete_entry"));
+    GtkWidget *id_error_label_delete = GTK_WIDGET(gtk_builder_get_object(main_builder, "label_id_delete_error"));
+
+    const char *id_text_delete = gtk_editable_get_text(GTK_EDITABLE(id_entry_delete));
+
+    // Additional validation: Check if the input is a non-empty numeric string
+    for (int i = 0; id_text_delete[i] != '\0'; i++)
+    {
+        if (!isdigit(id_text_delete[i]))
+        {
+            // If not a number, show error label and return
+            gtk_widget_set_visible(id_error_label_delete, TRUE);
+            return;
+        }
+    }
+
+    // Form validation
+    if (strlen(id_text_delete) == 0)
+    {
+        gtk_widget_set_visible(id_error_label_delete, TRUE);
+        return;
+    }
+    else
+    {
+        gtk_widget_set_visible(id_error_label_delete, FALSE);
+    }
+
+    FichierTOV fichier;
+    HashTable hashTable;
+    BufferTransmission buffer;
+    EnregistrementPhysique newEnregistrement;
+
+    int id = atoi(id_text_delete);
+    supprimerEnregistrement(&fichier, &hashTable, id);
+
+    
+    // If it passes both checks, hide the error labels
+    gtk_widget_set_visible(id_error_label_delete, FALSE);
+
+    // Perform delete operation here
+
+    // Hide the modal window after confirming
+    gtk_widget_set_visible(modal_window_delete, FALSE);
 }
 
 // ---------------------------------------------------------------------------------------------
 // algorithmes
-void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax)
-{
-    // if (fichier == NULL)
-    //     return;
 
-    // fichier->entete.nbEnregistrements = 0;
-    // fichier->entete.capaciteMax = capaciteMax;
-    // fichier->enregistrements = malloc(capaciteMax * sizeof(EnregistrementPhysique));
-    // for (int i = 0; i < capaciteMax; i++)
-    // {
-    //     fichier->enregistrements[i].donnees = NULL;
-    // }
+void initialiserHashTable(HashTable *hashTable, int taille)
+{
+    hashTable->table = malloc(taille * sizeof(int));
+    for (int i = 0; i < taille; i++)
+    {
+        hashTable->table[i] = -1; // if empty then -1
+    }
+    hashTable->taille = taille;
 }
 
-// void libererFichierTOV(FichierTOV *fichier)
-// {
-//     if (fichier == NULL)
-//         return;
+// it's role est de transformer un ID en un indice
+int hashFunction(int id, int tailleTable)
+{
+    return id % tailleTable;
+}
 
-//     for (int i = 0; i < fichier->entete.nbEnregistrements; i++)
-//     {
-//         free(fichier->enregistrements[i].donnees);
-//     }
-//     free(fichier->enregistrements);
-// }
+// initialisation du fichierTOV
+void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax)
+{
 
-// bool ajouterEnregistrement(FichierTOV *fichier, BufferTransmission *buffer)
-// {
-//     if (fichier == NULL || buffer == NULL || fichier->entete.nbEnregistrements >= fichier->entete.capaciteMax)
-//     {
-//         return false;
-//     }
+    // verifie si le pointeur fichier est NULL
+    // Raison: je previent l'acces a un pointeur non initialisé
+    if (fichier == NULL)
+    {
+        printf("initialiserFichierTOV: fichier is NULL\n");
+        return;
+    }
 
-//     EnregistrementPhysique *enreg = &fichier->enregistrements[fichier->entete.nbEnregistrements];
-//     enreg->donnees = malloc((buffer->taille + 1) * sizeof(char));
-//     if (enreg->donnees == NULL)
-//     {
-//         return false;
-//     }
-//     strncpy(enreg->donnees, buffer->data, buffer->taille);
-//     enreg->donnees[buffer->taille] = '\0';
-//     enreg->entete.id = fichier->entete.nbEnregistrements;
-//     enreg->entete.tailleDonnees = buffer->taille;
-//     enreg->separateur = '|';
+    // initialisation des champs de l'entete
+    fichier->entete.nbEnregistrements = 0;
+    fichier->entete.capaciteMax = capaciteMax;
 
-//     fichier->entete.nbEnregistrements++;
-//     return true;
-// }
+    // alloue de la mémoire pour stocker les enregistrements, based on la capaciteMax
+    fichier->enregistrements = malloc(capaciteMax * sizeof(EnregistrementPhysique));
 
-// bool supprimerEnregistrement(FichierTOV *fichier, int id)
-// {
-//     if (fichier == NULL)
-//         return false;
+    // vérifie si l'allocation de mémoire a echoué
+    if (fichier->enregistrements == NULL)
+    {
+        printf("initialiserFichierTOV: Memory allocation failed\n");
+        return;
+    }
 
-//     for (int i = 0; i < fichier->entete.nbEnregistrements; i++)
-//     {
-//         if (fichier->enregistrements[i].entete.id == id)
-//         {
-//             free(fichier->enregistrements[i].donnees);
-//             for (int j = i; j < fichier->entete.nbEnregistrements - 1; j++)
-//             {
-//                 fichier->enregistrements[j] = fichier->enregistrements[j + 1];
-//             }
-//             fichier->entete.nbEnregistrements--;
-//             return true;
-//         }
-//     }
-//     return false;
-// }
+    // affichage de reussite de initialisation et initialisation de nextID à 0
+    printf("initialiserFichierTOV: initialization successful\n");
+    fichier->entete.nextID = 0;
+}
 
-// EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id)
-// {
-//     if (fichier == NULL)
-//         return NULL;
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement)
+{
+    // verification si les 2 pointeurs sont NULL pour eviter des erreurs de segmentation
+    if (fichier == NULL || enregistrement == NULL)
+        return false;
 
-//     for (int i = 0; i < fichier->entete.nbEnregistrements; i++)
-//     {
-//         if (fichier->enregistrements[i].entete.id == id)
-//         {
-//             return &fichier->enregistrements[i];
-//         }
-//     }
-//     return NULL;
-// }
+    const char *nomFichier = "monFichierTOV.tov";
 
-// void afficherFichierTOV(const FichierTOV *fichier)
-// {
-//     if (fichier == NULL)
-//         return;
+    FILE *fichierPhysique = fopen(nomFichier, "a");
+    if (fichierPhysique == NULL)
+        return false;
 
-//     printf("Fichier TOV contient %d enregistrements:\n", fichier->entete.nbEnregistrements);
-//     for (int i = 0; i < fichier->entete.nbEnregistrements; i++)
-//     {
-//         printf("Enregistrement %d: %s\n", fichier->enregistrements[i].entete.id, fichier->enregistrements[i].donnees);
-//     }
-// }
+    // check la capacite maximale avant d'inserer
+    if (fichier->entete.nbEnregistrements >= fichier->entete.capaciteMax)
+    {
+        fclose(fichierPhysique);
+        return false;
+    }
 
-// void remplirBuffer(BufferTransmission *buffer, const char *data)
-// {
-//     if (buffer == NULL || data == NULL)
-//         return;
+    // en ajoutant cette linge de code , le probleme de id is fixed :)
+    enregistrement->entete.id = fichier->entete.nextID++;
 
-//     size_t dataLen = strlen(data);
-//     if (dataLen >= TAILLE_BUFFER)
-//     {
-//         dataLen = TAILLE_BUFFER - 1;
-//     }
-//     strncpy(buffer->data, data, dataLen);
-//     buffer->data[dataLen] = '\0';
-//     buffer->taille = dataLen;
-// }
+    // ecrire les donnees de l'enregistrement dans le fichier
+    fprintf(fichierPhysique, "%d|%s|%s|%s\n",
+            enregistrement->entete.id,
+            enregistrement->data1,
+            enregistrement->data2,
+            enregistrement->data3);
 
-// void viderBuffer(BufferTransmission *buffer)
-// {
-//     if (buffer == NULL)
-//         return;
+    // ajouter l'enregistrement dans le tableau en memoire
+    fichier->enregistrements[fichier->entete.nbEnregistrements] = *enregistrement;
+    fichier->entete.nbEnregistrements++;
 
-//     memset(buffer->data, 0, TAILLE_BUFFER);
-//     buffer->taille = 0;
-// }
+    fclose(fichierPhysique);
 
-// unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregistrement)
-// {
-//     if (enregistrement == NULL)
-//         return 0;
+    // mise à jour de la table de hashage
+    int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille);
+    hashTable->table[indexHash] = enregistrement->entete.id;
 
-//     return sizeof(EnteteEnregistrement) + sizeof(char) + strlen(enregistrement->donnees);
-// }
+    return true;
+}
+
+void libererFichierTOV(FichierTOV *fichier)
+{
+    // verifier si le fichier est null
+    if (fichier == NULL)
+    {
+        printf("libererFichierTOV: fichier est NULL\n");
+        return;
+    }
+    // si le fichier n'est pas null en le libere et reset de tout les champs concernant les enregistrement
+    free(fichier->enregistrements);
+    fichier->enregistrements = NULL;
+    fichier->entete.nbEnregistrements = 0;
+
+    printf("libererFichierTOV: memoire liberer\n");
+}
+
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id)
+{
+
+    const char *nomFichier = "monFichierTOV.tov";
+    // cree et open un fichier temporaire pour stocker temporairement les enregistrements qui ne sont pas supprimes.
+    const char *nomFichierTemp = "tempFichierTOV.tov";
+
+    if (fichier == NULL)
+        return false;
+
+    FILE *fichierPhysique = fopen(nomFichier, "r");
+    FILE *fichierTemp = fopen(nomFichierTemp, "w");
+
+    if (fichierPhysique == NULL || fichierTemp == NULL)
+    {
+        if (fichierPhysique != NULL)
+            fclose(fichierPhysique);
+        if (fichierTemp != NULL)
+            fclose(fichierTemp);
+        return false;
+    }
+
+    char ligne[1024];
+    EnregistrementPhysique temp;
+    bool found = false;
+    int indexFound = -1;
+
+    for (int i = 0; fgets(ligne, sizeof(ligne), fichierPhysique) != NULL; ++i)
+    {
+        sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
+        if (temp.entete.id != id)
+        {
+            fputs(ligne, fichierTemp);
+        }
+        else
+        {
+            found = true;
+            indexFound = i;
+        }
+    }
+
+    fclose(fichierPhysique);
+    fclose(fichierTemp);
+
+    if (found)
+    {
+        // remplace l'ancien fichier par le nouveau
+        remove(nomFichier);
+        rename(nomFichierTemp, nomFichier);
+
+        // mettre à jour la structure en memoire
+        for (int i = indexFound; i < fichier->entete.nbEnregistrements - 1; ++i)
+        {
+            fichier->enregistrements[i] = fichier->enregistrements[i + 1];
+        }
+        fichier->entete.nbEnregistrements--;
+
+        memset(&fichier->enregistrements[fichier->entete.nbEnregistrements], 0, sizeof(EnregistrementPhysique));
+    }
+    else
+    {
+        remove(nomFichierTemp);
+    }
+
+    // same thing kima wch derna f la fonction ajouter enregistrement
+    int indexHash = hashFunction(id, hashTable->taille);
+    // bch nbyno beli cet emplacement est vide dans la table de hashage
+    hashTable->table[indexHash] = -1;
+
+    return found;
+}
 
 int main(int argc, char *argv[])
 {
     GtkApplication *app;
     int status;
-    printf("helloworld");
+    printf("hello world");
 
     // Create a new application
     app = gtk_application_new("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);

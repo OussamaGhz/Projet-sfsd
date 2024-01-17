@@ -11,7 +11,6 @@
 #define TAILLE_BUFFER 512
 #define SEPARATEUR '|'
 
-
 /**
  * Structure te3 l'entête enregistrement physique
  * Contient l'ID de l'enregistrement et la taille des donnees.
@@ -19,23 +18,29 @@
 typedef struct
 {
     int id;
-    int tailleBlocR; //taille block reel
+    int tailleBlocR; // taille block reel
 } EnteteEnregistrement;
 
-
-
-
-
-typedef struct {
+// adding new champs à l'enregistrement physique
+typedef struct
+{
     EnteteEnregistrement entete;
-    char data1[TAILLE_MAX_ENREGISTREMENT]; //tableau de caracteres
-
+    char data1[TAILLE_MAX_ENREGISTREMENT];
+    char data2[TAILLE_MAX_ENREGISTREMENT];
+    char data3[TAILLE_MAX_ENREGISTREMENT];
 } EnregistrementPhysique;
+
+typedef struct
+{
+    int *table;
+    int taille;
+} HashTable;
 
 typedef struct
 {
     int nbEnregistrements;
     int capaciteMax;
+    int nextID; // nouveau champ pour suivre l'id global
 } EnteteFichierTOV;
 
 // Structure te3 buffer de transmission
@@ -49,7 +54,7 @@ typedef struct
 typedef struct
 {
     EnteteFichierTOV entete;
-    EnregistrementPhysique *enregistrements; //to change , nehi el pointeur w diro tableau
+    EnregistrementPhysique *enregistrements; // to change , nehi el pointeur w diro tableau
 } FichierTOV;
 
 // Prototypes de fonctions pour la gestion du fichier TOV
@@ -60,17 +65,14 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 // Verifiez si fichier n'est pas NULL
 void libererFichierTOV(FichierTOV *fichier);
 
-
-//Verifiez si fichier et le Buffer ne sont pas NULL
-bool ajouterEnregistrement(FichierTOV *fichier, EnregistrementPhysique *enregistrement);
-
-
+// Verifiez si fichier et le Buffer ne sont pas NULL
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement);
 
 // Verifiez si fichier n'est pas NULL
-bool supprimerEnregistrement(FichierTOV *fichier, int id);
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id);
 
 // Verifiez si fichier n'est pas NULL
-EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id);
+EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id); // changed to fit the new function
 
 // Verifiez si fichier n'est pas NULL
 void afficherFichierTOV(const FichierTOV *fichier);
@@ -83,7 +85,4 @@ void viderBuffer(BufferTransmission *buffer);
 la taille des enregistrements est variable w ttbdl d'apres wch ndkhlo hna*/
 unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregistrement);
 
-
 #endif
-
-
