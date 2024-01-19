@@ -1,0 +1,35 @@
+nom: chabati
+prenom 1: rayan
+matricule: 54654
+filiere: info
+nom: chabati
+prenom 1: rayan
+prenom 2: adel
+matricule: 6575
+filiere: info
+nom: chabati
+prenom 1: sgyud
+matricule: 7656
+filiere: inff
+nom: chabati
+prenom 1: omar
+matricule: 6364
+filiere: med
+nom: chabati
+prenom 1: ha
+matricule: 76575
+filiere: med
+nom: chabati
+prenom 1: cl
+matricule: 75
+filiere: cll
+nom: chabati
+prenom 1: omar
+prenom 2: mar
+matricule: 5464
+filiere: inf
+nom: chabati
+prenom 1: poi
+prenom 2: sson
+matricule: 1234
+filiere: poit
