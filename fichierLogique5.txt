@@ -1,0 +1,13 @@
+nom: chabati
+prenom 1: rayan
+matricule: 5353
+filiere: gyu
+nom: chabati
+prenom 1: raya
+prenom 2: try
+matricule: 564
+filiere: info
+nom: chaj
+prenom 1: syg
+matricule: 644
+filiere: ygdy
