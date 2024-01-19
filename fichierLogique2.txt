@@ -15,3 +15,26 @@ prenom 1: asel
 prenom 2: iop
 matricule: 24226
 filiere: compil
+nom: chabati
+prenom 1: rayan
+prenom 2: adel
+matricule: 2352
+filiere: info
+nom: ch
+prenom 1: TYR
+prenom 2: yut
+matricule: 4634
+filiere: info
+nom: ch
+prenom 1: TFYTF
+prenom 2: GFUYG
+matricule: 654
+filiere: info
+nom: chaba
+prenom 1: yt
+matricule: 55
+filiere: IJI
+nom: cha
+prenom 1: raya
+matricule: 45356
+filiere: infofo

@@ -1,8 +1,8 @@
 FichierTOV Header:
-nbEnregistrements: 2
-nbrBlock: 2
+nbEnregistrements: 4
+nbrBlock: 4
 facteurdeblockage: 2
-nextId: 2
+nextId: 4
 
 EnregistrementPhysique 0 Header:
 id: 0
@@ -11,5 +11,15 @@ nbrEnregistrementLogique: 2
 
 EnregistrementPhysique 1 Header:
 id: 1
-tailleDonnees: 88
-nbrEnregistrementLogique: 1
+tailleDonnees: 176
+nbrEnregistrementLogique: 2
+
+EnregistrementPhysique 2 Header:
+id: 2
+tailleDonnees: 176
+nbrEnregistrementLogique: 2
+
+EnregistrementPhysique 3 Header:
+id: 3
+tailleDonnees: 176
+nbrEnregistrementLogique: 2

@@ -1,0 +1,2 @@
+EnteteFichierTOV|nbEnregistrements=0|nbrBlock=0|facteurdeblockage=2|nextId=0
+EnteteEnregistrement|id=1|tailleDonnees=0|nbrEnregistrementLogique=0|enregistrementLogique|nom=chabati|prenom=rayan|matricule=545|filiere=info|
