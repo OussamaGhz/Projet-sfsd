@@ -48,20 +48,26 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 }
 
 
-//liberation du fichier TOv
+//remaking the function libierFichierTOV and fixing it's problems
 void libererFichierTOV(FichierTOV *fichier) {
     //verifier si le fichier est null
     if (fichier == NULL) {
         printf("libererFichierTOV: fichier est NULL\n");
         return;
     }
-    //si le fichier n'est pas null en le libere et reset de tout les champs concernant les enregistrement
+
+    //supprimer le fichier physique
+    const char *nomFichier = "monFichierTOV.tov";
+    remove(nomFichier);
+
+    //liberer the memory of les enregistrements
     free(fichier->enregistrements);
     fichier->enregistrements = NULL;
     fichier->entete.nbEnregistrements = 0;
 
-    printf("libererFichierTOV: memoire liberer\n");
+    printf("libererFichierTOV: memoire liberer et fichier supprime\n");
 }
+
 
 
 
@@ -106,7 +112,6 @@ bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, Enregistre
 }
 
 
-//too much work , explication apres , la fonction marche tres bien pas la peine de la modifier :)
 //supprimer un enregistrement specified with his ID du fichier TOV:
 bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) {
 
@@ -116,25 +121,36 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) 
 
     if (fichier == NULL) return false;
 
+    //ouvrir le fichier d'origine en mode lecture en utilisant fopen et stocke le pointeur dans fichierPhysique
     FILE *fichierPhysique = fopen(nomFichier, "r");
+    //ouvrir le fichier temporaire en mode ecriture en utilisant fopen et stocke le pointeur dans fichierTemp
     FILE *fichierTemp = fopen(nomFichierTemp, "w");
 
+
+    //cela va confirmer que la suppression n'est pas effectuee si l'ouverture des fichiers de donnees has failed
     if (fichierPhysique == NULL || fichierTemp == NULL) {
         if (fichierPhysique != NULL) fclose(fichierPhysique);
         if (fichierTemp != NULL) fclose(fichierTemp);
         return false;
     }
 
+    //variables
     char ligne[1024];
     EnregistrementPhysique temp;
     bool found = false;
     int indexFound = -1;
 
+    //lecture des enregistrements
     for (int i = 0; fgets(ligne, sizeof(ligne), fichierPhysique) != NULL; ++i) {
+
+        //chaque ligne est stockee dans la variable ligne
         sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
+        /*la fonction compare l'ID de chaque enregistrement a l'ID given by user.
+        Si l'ID correspond, this means que l'enregistrement doit etre deleted.*/
         if (temp.entete.id != id) {
             fputs(ligne, fichierTemp);
         } else {
+        //La variable found est definie à true et l'indice de l'enregistrement a supprimer (indexFound) est stocke.
             found = true;
             indexFound = i;
         }
@@ -143,6 +159,7 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) 
     fclose(fichierPhysique);
     fclose(fichierTemp);
 
+    //si un enregistrement avec l'ID specifie a ete trouve ( foud == true)
     if (found) {
         //remplace l'ancien fichier par le nouveau
         remove(nomFichier);
@@ -153,7 +170,8 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) 
             fichier->enregistrements[i] = fichier->enregistrements[i + 1];
         }
         fichier->entete.nbEnregistrements--;
-
+        
+        //reinitialise l'emplacement de l'enregistrement supprime avec des zeros en utilisant memset
         memset(&fichier->enregistrements[fichier->entete.nbEnregistrements], 0, sizeof(EnregistrementPhysique));
     } else {
         remove(nomFichierTemp);
@@ -199,6 +217,8 @@ void afficherFichierTOV(const FichierTOV *fichier) {
     for (int i = 0; i < fichier->entete.nbEnregistrements; i++) {
         printf("Enregistrement %d:\n", i);
         printf("data1: %s\n", fichier->enregistrements[i].data1);
+        printf("data2: %s\n", fichier->enregistrements[i].data2);
+        printf("data3: %s\n", fichier->enregistrements[i].data3);
     }
 }
 
