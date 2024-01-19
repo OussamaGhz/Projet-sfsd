@@ -9,6 +9,7 @@ void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLo
     fichier->entete.facteurdeblockage = facteurDeBlockage;
     fichier->entete.nextId = 0;
     printf(" entete du fichier phisique initialiser avec succes\n");
+
     // Initialisation du tableau d'enregistrement du fichierTov
     for(int i = 0; i < MAX_ENREGISTREMENTS; i++) {
         fichier->enregistrements[i].entete.id = 0;
@@ -17,6 +18,7 @@ void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLo
         memset(fichier->enregistrements[i].dataBlock, 0, sizeof(fichier->enregistrements[i].dataBlock));
     }
     printf(" fichier phisique initialiser avec succes\n");
+
 // Initialisation du fichierLogique
     for(int i = 0; i < MAX_ENREGISTREMENTS; i++) {
         memset(fichierLog->classe[i].nom, 0, sizeof(fichierLog->classe[i].nom));
@@ -61,15 +63,18 @@ void chargerDonneesFichierLogique(fichierLogique* fichierLog, const char* chemin
 
     fclose(fichierLogiqueFile);
 }
-//chargement des donnes header
+
+//chargement des donnes header backend + donnes logique dans la structure TOV
 void chargerDonneesFichierTOV(FichierTOV* fichierTOV, const char* cheminHeaderInfo, const char* cheminFichierLogique) {
     FILE* headerInfoFile = fopen(cheminHeaderInfo, "r");
     FILE* fichierLogiqueFile = fopen(cheminFichierLogique, "r");
+
 // erreure d'ouverture ou 1 des fichier n'existe pas
     if (headerInfoFile == NULL || fichierLogiqueFile == NULL) {
         printf("Erreur lors de l'ouverture du fichier.\n");
         return;
     }
+
 //les 2 fichier sont ouverts
 //lecture de l'entete du fichier backend
  fscanf(headerInfoFile, "FichierTOV Header:\n");
@@ -113,11 +118,13 @@ for (int j = 0; j < fichierTOV->enregistrements[i].entete.nbrEnregistrementLogiq
     fclose(headerInfoFile);
     fclose(fichierLogiqueFile);
 }
+
 // fusion des 2 fonction pour que ca soit plus simple
 void chargerDonnees(FichierTOV* fichierTOV, fichierLogique* fichierLog, const char* cheminFichierLogique, const char* cheminHeaderInfo) {
     chargerDonneesFichierLogique(fichierLog, cheminFichierLogique);
     chargerDonneesFichierTOV(fichierTOV, cheminHeaderInfo,cheminFichierLogique);
 }
+
 // verification de resussite de chargement
 void afficherDonneesFichierTOV(FichierTOV* fichierTOV) {
     printf("Affichage des données du FichierTOV :\n");
@@ -129,10 +136,10 @@ void afficherDonneesFichierTOV(FichierTOV* fichierTOV) {
         printf("  Nombre d'enregistrements logiques: %d\n", fichierTOV->enregistrements[i].entete.nbrEnregistrementLogique);
         printf("  Données du bloc: %s\n", fichierTOV->enregistrements[i].dataBlock);
     }
-}
+}//verification de reussite de l'insertion
 void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
     printf("Affichage des données du FichierTOV :\n");
-    printf("affichage de l'entete de fichier apres chargement : %d %d %d %d",fichierTOV->entete.nbEnregistrements,fichierTOV->entete.nbrBlock,fichierTOV->entete.facteurdeblockage,fichierTOV->entete.nextId);
+    printf("affichage de l'entete de fichier apres chargement : %d %d %d %d\n",fichierTOV->entete.nbEnregistrements,fichierTOV->entete.nbrBlock,fichierTOV->entete.facteurdeblockage,fichierTOV->entete.nextId);
     for (int i = 0; i < fichierTOV->entete.nbEnregistrements; i++) {
         printf("EnregistrementPhysique %d:\n", i);
         printf("  ID: %d\n", fichierTOV->enregistrements[i].entete.id);
@@ -147,36 +154,34 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
     }
 }
 
-
-
-
-
    //fonction d'insertion logique et phisique dans un fichier
    void insertionLogique(fichierLogique* fichierLog, FichierTOV* fichierTOV, int nbrInsertion, int facteurDeBlocage, const char* cheminFichierLogique, const char* cheminHeaderInfo) {
-    
+    //chargement des donne +affichage des donne charge
     chargerDonnees(fichierTOV, fichierLog, cheminFichierLogique, cheminHeaderInfo);
     afficherDonneesFichierTOV(fichierTOV);
 
-    int currentBlock = fichierTOV->entete.nbEnregistrements - 1;
-    for(int i = 0; i < nbrInsertion; i++) {
+    int currentBlock = fichierTOV->entete.nbEnregistrements - 1;//revenir au block car currenteBlock = nbblock-1
+    for(int i = 0; i < nbrInsertion; i++) {//verification de la capacite max
         if (fichierLog->nbrEnregistrementLogique >= MAX_ENREGISTREMENTS) {
             printf("le fichierLogique est remplie. on ne peut pas inserer plus d'enregistrement.\n");
             return;
         }
-   // la saisie du nouvelle enregistrement
+   // la saisie du nouvelle enregistrement a inserer
         enregistrementLogique enregLog;
 
         printf("Enter nom: ");
         scanf("%s", enregLog.nom);
+
         int n;
         printf("entrer le nombre de vos prenom: ");
-        scanf("%d",&n);
-        char chaine[40]="";
+        scanf("%d",&n);//max 2 jusqu'a maintenant selon le format
+        char chaine[40]="";//pour la concatenation (besois dans le stockage de data)
+
         for(int j = 0; j < n; j++) {
             enregLog.prenom[j] = malloc(20 * sizeof(char));
             printf("Enter prenom %d: ", j+1);
-            scanf("%s", enregLog.prenom[j]);
-            strcat(chaine,enregLog.prenom[j]);
+            scanf("%s", enregLog.prenom[j]);//insertiondes prenom
+            strcat(chaine,enregLog.prenom[j]);//concatenation des prenoms dans chaine
         }
 
         printf("Enter matricule: ");
@@ -184,25 +189,28 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
 
         printf("Enter filiere: ");
         scanf("%s", enregLog.filiere);
-       
+       //stockage dans la structure fichierlog (stockage tamporaire)
         fichierLog->classe[fichierLog->nbrEnregistrementLogique] = enregLog;
         fichierLog->nbrEnregistrementLogique++;
-        //insertion du nouvelle enregistrement dans le fichier permanent
-        FILE* file = fopen(cheminFichierLogique, "a");
+       
+        //insertion du nouvelle enregistrement dans le fichier permanent(stockage permanent)
+        FILE* file = fopen(cheminFichierLogique, "a");//mode ajouter
         if (file == NULL) {
-            printf("Failed to open the file.\n");
+            printf("echece d'ouverture du fichier.\n");
             return;
         }
-
+        //l'ecrirure des donne inserer dans la fin du fichier
         fprintf(file, "nom: %s\n", enregLog.nom);
+
         for(int i = 0; i < n; i++) {
             fprintf(file, "prenom %d: %s\n", i+1, enregLog.prenom[i]);
         }
+
         fprintf(file, "matricule: %d\n", enregLog.matricule);
         fprintf(file, "filiere: %s\n", enregLog.filiere);
 
         fclose(file);
-        //ajoute d'un nouveau block selon le facteur de blockage et la position de current block
+        //ajoute d'un nouveau block selon le facteur de blockage et la position de current block allocation de block
         if(currentBlock<0)currentBlock=0;
         if (currentBlock >= fichierTOV->entete.nbEnregistrements || fichierTOV->enregistrements[currentBlock].entete.nbrEnregistrementLogique >= facteurDeBlocage) {
             currentBlock = fichierTOV->entete.nbEnregistrements;
@@ -212,25 +220,26 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
             fichierTOV->entete.nbEnregistrements++;
             fichierTOV->entete.nbrBlock++;
         }
-        //copie des element inserer dans le fichier Tov
-        char enregLogStr[256];
-sprintf(enregLogStr, "%s||%s||%d||%s||", enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);
-        memcpy(fichierTOV->enregistrements[currentBlock].dataBlock + fichierTOV->enregistrements[currentBlock].entete.tailleDonnees, enregLogStr,strlen(enregLogStr) + 1);
-        fichierTOV->enregistrements[currentBlock].entete.tailleDonnees += strlen(enregLogStr)+1;
-        fichierTOV->enregistrements[currentBlock].entete.nbrEnregistrementLogique++;
-        // Write the header information to a file
+        //copie des element inserer dans le fichier Tov (stockage temporaire dans la structure TOV)
+        char enregLogTov[256];//suport de stockage contenant le format de data souhaite
+        sprintf(enregLogTov, "%s||%s||%d||%s||", enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
+        memcpy(fichierTOV->enregistrements[currentBlock].dataBlock + fichierTOV->enregistrements[currentBlock].entete.tailleDonnees, enregLogTov,strlen(enregLogTov) + 1);//l'alocation de memeoire pour le stockage da data + decalage au cas ou on a plusieur enregistrement logique
+        fichierTOV->enregistrements[currentBlock].entete.tailleDonnees += strlen(enregLogTov)+1;//actualisation de la taille du block
+        fichierTOV->enregistrements[currentBlock].entete.nbrEnregistrementLogique++;//actualisation du nombre d'enregistrement logique
+
+        // actualisaton du fichier  header (backend)
         file = fopen(cheminHeaderInfo, "w");
-        if (file == NULL) {
+        if (file == NULL) {//verification de l'ouverture du fichier
             printf("Failed to open the file.\n");
             return;
         }
-
+        //ecriture entete de fichier 
         fprintf(file, "FichierTOV Header:\n");
         fprintf(file, "nbEnregistrements: %d\n", fichierTOV->entete.nbEnregistrements);
         fprintf(file, "nbrBlock: %d\n", fichierTOV->entete.nbrBlock);
         fprintf(file, "facteurdeblockage: %d\n", fichierTOV->entete.facteurdeblockage);
         fprintf(file, "nextId: %d\n", fichierTOV->entete.nextId);
-
+        //ecriture de l'entete des block
         for(int i = 0; i < fichierTOV->entete.nbEnregistrements; i++) {
             fprintf(file, "\nEnregistrementPhysique %d Header:\n", i);
             fprintf(file, "id: %d\n", fichierTOV->enregistrements[i].entete.id);
@@ -240,7 +249,7 @@ sprintf(enregLogStr, "%s||%s||%d||%s||", enregLog.nom,chaine, enregLog.matricule
 
         fclose(file);
     }
-    afficherDonneesFichierTOv(fichierTOV);
+    afficherDonneesFichierTOv(fichierTOV);//affichage des donne de TOV pour verifier le succes de l'insertion
 
 }
 
@@ -300,7 +309,7 @@ int main(){
     FichierTOV fichier;
     int facteurDeBlockage;
     initialiserFichierTOV(&fichier,2,&fichier2);
-    insertionLogique(&fichier2,&fichier,2,2,"fichierLotest.txt","headerInftest.txt");
+    insertionLogique(&fichier2,&fichier,1,2,"fichierLotest.txt","headerInftest.txt");
 
 
 
