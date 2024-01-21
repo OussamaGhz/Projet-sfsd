@@ -10,7 +10,7 @@
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
 #define SEPARATEUR '|' 
-
+#define SIZE 30
 
 // first on definie la structure de l'entete de l'enregistrement phsique
 typedef struct {
@@ -28,7 +28,7 @@ typedef struct {
 
 // on definie la structure de l'entete du fichier
 typedef struct {
-    int nbEnregistrements;
+    int nbEnregistrementslogique;
     int nbrBlock;
     int facteurdeblockage;
     int nextId;
@@ -47,6 +47,7 @@ typedef struct {
 } FichierTOV;
 
 typedef struct{
+ int id; //ajout de l'id etudiant pour la designe en tant que cle de depart 
  char nom[20];
  char *prenom[5];
  int matricule;
@@ -58,7 +59,15 @@ typedef struct {
   int nbrEnregistrementLogique;
 }fichierLogique;
 
+typedef struct ElementTablHachabl {
+    int id;
+    int idBlock;
+    struct ElementTablHachabl* next;
+} ElementTablHachabl;
 
+typedef struct HashTable {
+    ElementTablHachabl* tab[SIZE];
+} HashTable;
 
 
 
