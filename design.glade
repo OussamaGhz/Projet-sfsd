@@ -38,7 +38,7 @@
                 <property name="width-request">150</property>
                 <property name="height-request">100</property>
                 <property name="sensitive">True</property>
-                <property name="visible">false</property>
+                <property name="visible">true</property>
               </object>
             </child>
             <child>
@@ -56,7 +56,7 @@
                 <property name="width-request">150</property>
                 <property name="height-request">100</property>
                 <property name="sensitive">True</property>
-                <property name="visible">false</property>
+                <property name="visible">true</property>
               </object>
             </child>
             <child>

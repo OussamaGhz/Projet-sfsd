@@ -19,16 +19,12 @@ void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data);
 void initialiserHashTable(HashTable *hashTable, int taille);
 
 gboolean confirm_create_clicked = FALSE;
-
-GtkWidget *button_add;
-GtkWidget *button_delete;
-GtkWidget *button_show_content;
+GtkApplication *global_app = NULL;
 
 FichierTOV fichier;
 HashTable hashTable;
 BufferTransmission buffer;
 EnregistrementPhysique newEnregistrement;
-
 
 // Activation callback
 static void activate(GtkApplication *app, gpointer user_data)
@@ -39,6 +35,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *modal_window_inf;
     GtkWidget *button_confirm_delete;
     GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create;
+    GtkWidget *label_content;
 
     // Initialize your TOV file (replace with actual initialization)
     FichierTOV *fichier = g_malloc(sizeof(FichierTOV));
@@ -56,6 +53,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
     button_confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_delete"));
+    label_content = GTK_WIDGET(gtk_builder_get_object(builder, "label_content"));
 
     if (!window || !button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete)
     {
@@ -66,6 +64,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     // Set the application for the window and connect signals
     gtk_window_set_application(GTK_WINDOW(window), app);
+    
 
     // Connect signals
     g_signal_connect(button_create, "clicked", G_CALLBACK(on_button_create_clicked), builder);
@@ -118,6 +117,8 @@ void on_button_create_clicked(GtkButton *button, gpointer user_data)
     // Set the modal window for the "Confirm" button
     g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), builder);
 
+    
+
     // Present the modal window using gtk_window_present
     gtk_window_present(GTK_WINDOW(modal_window_inf));
 
@@ -143,9 +144,6 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
 
     // Present the modal window using gtk_window_present
     gtk_window_present(GTK_WINDOW(modal_window));
-
-    // Release the builder
-    // g_object_unref(builder);
 }
 void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
 {
@@ -187,6 +185,8 @@ void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
     // initilaise the folder after confirming
     int capaciteFichier = atoi(length_text);
     initialiserFichierTOV(&fichier, capaciteFichier);
+
+    initialiserHashTable(&hashTable, capaciteFichier);
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window_inf, FALSE);
@@ -250,15 +250,9 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
             }
         }
 
-        
-
         // If it passes both checks, hide the error label
         gtk_widget_set_visible(id_error_label, FALSE);
     }
-
-    
-    
-    
 
     strcpy(newEnregistrement.data1, first_name);
     strcpy(newEnregistrement.data2, second_name);
@@ -267,10 +261,6 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
     if (ajouterEnregistrement(&fichier, &hashTable, &newEnregistrement))
     {
         printf("Enregistrement ajoute avec succes\n");
-        // Enable the "Add," "Delete," and "Show Content" buttons
-        gtk_widget_set_visible(button_add, TRUE);
-        gtk_widget_set_visible(button_delete, TRUE);
-        gtk_widget_set_visible(button_show_content, TRUE);
     }
     else
     {
@@ -279,22 +269,63 @@ void on_button_confirm_clicked(GtkButton *button, gpointer user_data)
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window, FALSE);
-
-    // Set confirm_create_clicked to TRUE
-    confirm_create_clicked = TRUE;
-
-    // Free the builder
-    g_object_unref(builder);
 }
 
 void on_button_quit_clicked(GtkButton *button, gpointer user_data)
 {
-    printf("Confirm button was clicked\n");
+    printf("Quit button was clicked\n");
+
+    // Free any allocated resources here
     libererFichierTOV(&fichier);
+
+    // Use the global application reference to quit the application
+    if (global_app != NULL) {
+        g_application_quit(G_APPLICATION(global_app));
+    }
 }
+
 
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
 {
+    GtkBuilder *main_builder = GTK_BUILDER(user_data);
+    GtkWidget *label_content = GTK_WIDGET(gtk_builder_get_object(main_builder, "label_content"));
+
+    const char *nomFichier = "monFichierTOV.tov";
+    FILE *fichierPhysique = fopen(nomFichier, "r");
+
+    if (fichierPhysique == NULL)
+    {
+        g_printerr("Failed to open file for reading\n");
+        return;
+    }
+
+    fseek(fichierPhysique, 0, SEEK_END);
+    long file_size = ftell(fichierPhysique);
+    fseek(fichierPhysique, 0, SEEK_SET);
+
+    char *file_content = malloc(file_size + 1);
+
+    if (file_content == NULL)
+    {
+        g_printerr("Memory allocation failed\n");
+        fclose(fichierPhysique);
+        return;
+    }
+
+    if (fread(file_content, 1, file_size, fichierPhysique) != file_size)
+    {
+        g_printerr("Failed to read file\n");
+        fclose(fichierPhysique);
+        free(file_content);
+        return;
+    }
+
+    file_content[file_size] = '\0';
+
+    gtk_label_set_text(GTK_LABEL(label_content), file_content);
+
+    fclose(fichierPhysique);
+    free(file_content);
 }
 
 void on_button_delete_clicked(GtkButton *button, gpointer user_data)
@@ -352,10 +383,6 @@ void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data)
     {
         gtk_widget_set_visible(id_error_label_delete, FALSE);
     }
-
-    
-    
-    
 
     int id = atoi(id_text_delete);
     supprimerEnregistrement(&fichier, &hashTable, id);
@@ -461,6 +488,7 @@ bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, Enregistre
     return true;
 }
 
+// remaking the function libierFichierTOV and fixing it's problems
 void libererFichierTOV(FichierTOV *fichier)
 {
     // verifier si le fichier est null
@@ -469,12 +497,17 @@ void libererFichierTOV(FichierTOV *fichier)
         printf("libererFichierTOV: fichier est NULL\n");
         return;
     }
-    // si le fichier n'est pas null en le libere et reset de tout les champs concernant les enregistrement
+
+    // supprimer le fichier physique
+    const char *nomFichier = "monFichierTOV.tov";
+    remove(nomFichier);
+
+    // liberer the memory of les enregistrements
     free(fichier->enregistrements);
     fichier->enregistrements = NULL;
     fichier->entete.nbEnregistrements = 0;
 
-    printf("libererFichierTOV: memoire liberer\n");
+    printf("libererFichierTOV: memoire liberer et fichier supprime\n");
 }
 
 bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id)
@@ -549,6 +582,19 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id)
     return found;
 }
 
+void afficherFichierTOV(const FichierTOV *fichier)
+{
+    if (fichier == NULL)
+        return;
+    // bouvle simple pour afficher les enregistrement et leur contenue
+    printf("Fichier TOV contient %d enregistrements:\n", fichier->entete.nbEnregistrements);
+    for (int i = 0; i < fichier->entete.nbEnregistrements; i++)
+    {
+        printf("Enregistrement %d:\n", i);
+        printf("data1: %s\n", fichier->enregistrements[i].data1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     GtkApplication *app;
@@ -557,6 +603,7 @@ int main(int argc, char *argv[])
 
     // Create a new application
     app = gtk_application_new("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
+    global_app = app;  // Set the global variable
 
     // Connect the activation signal to the activation callback
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
@@ -567,3 +614,4 @@ int main(int argc, char *argv[])
     g_object_unref(app);
     return status;
 }
+
