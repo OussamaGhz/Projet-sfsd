@@ -52,6 +52,8 @@ typedef struct{
  char *prenom[5];
  int matricule;
  char filiere[20];
+ int suplogique;
+ int taille;
 }enregistrementLogique;
 
 typedef struct {

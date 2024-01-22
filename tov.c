@@ -26,7 +26,9 @@ void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLo
             fichierLog->classe[i].prenom[j] = NULL;
         }
         fichierLog->classe[i].matricule = 0;
+        fichierLog->classe[i].suplogique = 0;
         fichierLog->classe[i].id=-1;
+        fichierLog->classe[i].taille=0;
         memset(fichierLog->classe[i].filiere, 0, sizeof(fichierLog->classe[i].filiere));
     }
     fichierLog->nbrEnregistrementLogique = 0;
@@ -94,7 +96,8 @@ void chargerDonneesFichierLogique(fichierLogique* fichierLog, const char* chemin
     fscanf(fichierLogiqueFile, "prenom %s: %s\n", buffer, enregLog.prenom);
     fscanf(fichierLogiqueFile, "matricule: %d\n", &(enregLog.matricule));
     fscanf(fichierLogiqueFile, "filiere: %s\n", enregLog.filiere);
-
+    fscanf(fichierLogiqueFile, "supprimerLogiquement: %d\n", &(enregLog.suplogique));
+    fscanf(fichierLogiqueFile, "tailleDonneEnregistrement: %d\n", &(enregLog.taille));
     fichierLog->classe[i] = enregLog;
     i++;
 
@@ -153,9 +156,11 @@ for (int j = 0; j < fichierTOV->enregistrements[i].entete.nbrEnregistrementLogiq
     }
     fscanf(fichierLogiqueFile, "matricule: %d\n", &(enregLog.matricule));
     fscanf(fichierLogiqueFile, "filiere: %s\n", enregLog.filiere);
+    fscanf(fichierLogiqueFile, "supprimerLogiquement: %d\n", &(enregLog.suplogique));
+    fscanf(fichierLogiqueFile, "tailleDonneEnregistrement: %d\n", &(enregLog.taille));
     
     // Ajouter les données logiques au bloc de données
-    sprintf(fichierTOV->enregistrements[i].dataBlock + strlen(fichierTOV->enregistrements[i].dataBlock), "%d||%s||%s||%d||%s||",enregLog.id, enregLog.nom,prenoms, enregLog.matricule, enregLog.filiere);
+    sprintf(fichierTOV->enregistrements[i].dataBlock + strlen(fichierTOV->enregistrements[i].dataBlock), "%d||%d||%d||%s||%s||%d||%s||",enregLog.taille,enregLog.suplogique,enregLog.id, enregLog.nom,prenoms, enregLog.matricule, enregLog.filiere);
 }
         i++;
     }
@@ -214,10 +219,11 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
             printf("le fichierLogique est remplie. on ne peut pas inserer plus d'enregistrement.\n");
             return;
         }
-   // la saisie du nouvelle enregistrement a inserer
+     // la saisie du nouvelle enregistrement a inserer
         enregistrementLogique enregLog;
         
-        enregLog.id=fichierTOV->entete.nbEnregistrementslogique;                         //determination de l'id de chaque etudiant automatiquement
+        enregLog.id=fichierTOV->entete.nbEnregistrementslogique;
+        enregLog.suplogique=0;                         //determination de l'id de chaque etudiant automatiquement
         printf("Enter nom: ");
         scanf("%s", enregLog.nom);
         
@@ -238,6 +244,13 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
 
         printf("Enter filiere: ");
         scanf("%s", enregLog.filiere);
+
+        char enregLogTov[256];//suport de stockage contenant le format de data souhaite
+        sprintf(enregLogTov, "%d||%d||%s||%s||%d||%s||",enregLog.suplogique,enregLog.id,enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
+        int tailleenrgistrement=strlen(enregLogTov);
+        char enreglog2[20];//pour la transition
+        sprintf(enreglog2,"%d||",tailleenrgistrement);
+        tailleenrgistrement+=strlen(enreglog2); 
        //stockage dans la structure fichierlog (stockage tamporaire)
         fichierLog->classe[fichierLog->nbrEnregistrementLogique] = enregLog;
         fichierLog->nbrEnregistrementLogique++;
@@ -258,7 +271,8 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
 
         fprintf(file, "matricule: %d\n", enregLog.matricule);
         fprintf(file, "filiere: %s\n", enregLog.filiere);
-
+        fprintf(file, "supprimerLogiquement: %d\n", enregLog.suplogique);
+        fprintf(file, "tailleDonneEnregistrement: %d\n", tailleenrgistrement);
         fclose(file);
         //ajoute d'un nouveau block selon le facteur de blockage et la position de current block allocation de block
         if(currentBlock<0)currentBlock=0;
@@ -270,14 +284,13 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
             fichierTOV->entete.nbrBlock++;
         }
         insertionhachable(table,enregLog.id,fichierTOV->enregistrements[currentBlock].entete.id);
-
+        
         //copie des element inserer dans le fichier Tov (stockage temporaire dans la structure TOV)
-        char enregLogTov[256];//suport de stockage contenant le format de data souhaite
-        sprintf(enregLogTov, "%d||%s||%s||%d||%s||",enregLog.id,enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
-        memcpy(fichierTOV->enregistrements[currentBlock].dataBlock + fichierTOV->enregistrements[currentBlock].entete.tailleDonnees, enregLogTov,strlen(enregLogTov) + 1);//l'alocation de memeoire pour le stockage da data + decalage au cas ou on a plusieur enregistrement logique
-        fichierTOV->enregistrements[currentBlock].entete.tailleDonnees += strlen(enregLogTov)+1;//actualisation de la taille du block
+        sprintf(enregLogTov, "%d||%d||%d||%s||%s||%d||%s||",tailleenrgistrement,enregLog.suplogique,enregLog.id,enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
+        memcpy(fichierTOV->enregistrements[currentBlock].dataBlock + fichierTOV->enregistrements[currentBlock].entete.tailleDonnees, enregLogTov,strlen(enregLogTov));//l'alocation de memeoire pour le stockage da data + decalage au cas ou on a plusieur enregistrement logique
+        fichierTOV->enregistrements[currentBlock].entete.tailleDonnees += strlen(enregLogTov);//actualisation de la taille du block
         fichierTOV->enregistrements[currentBlock].entete.nbrEnregistrementLogique++;//actualisation du nombre d'enregistrement logique
-
+        
         // actualisaton du fichier  header (backend)
         file = fopen(cheminHeaderInfo, "w");
         if (file == NULL) {//verification de l'ouverture du fichier
@@ -300,52 +313,55 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
 
         fclose(file);
     }
+    fichierTOV->enregistrements[currentBlock].dataBlock[fichierTOV->enregistrements[currentBlock].entete.tailleDonnees] = '\0';
     afficherDonneesFichierTOv(fichierTOV);//affichage des donne de TOV pour verifier le succes de l'insertion
      afficherTableHachage(table);
 }
 
-   
-bool recherchePhysique(FichierTOV* fichierTOV, int matriculeRecherche) {
-    for(int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
-        for(int j = 0; j < fichierTOV->enregistrements[i].entete.nbrEnregistrementLogique; j++) {
-            enregistrementLogique* enregLog = (enregistrementLogique*)(fichierTOV->enregistrements[i].dataBlock + j * sizeof(enregistrementLogique));
-            if (enregLog->matricule == matriculeRecherche) {
-                return true;
-            }
+
+void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppression) {
+    int id;
+    for (int i = 0; i < nbrSuppression; i++) {
+       printf("Entrez l'ID de l'étudiant à supprimer: ");
+        scanf("%d", &id);
+
+     // Rechercher l'ID dans la table de hachage
+        ElementTablHachabl* element = rechercherElement(table, id);
+        if (element == NULL) {
+            printf("Cet élément n'existe pas.\n");
+            continue;
         }
+        // Trouver le bloc correspondant dans FichierTOV
+        int idBlock = element->idBlock;
+        EnregistrementPhysique* block = &(fichierTOV->enregistrements[idBlock]);
+        printf("%d",element->id);
+        printf("%d\n",idBlock);
+        // Parcourir les enregistrements logiques dans le bloc
+        
+     char* ptr = block->dataBlock;
+     while (ptr < block->dataBlock + block->entete.tailleDonnees) {
+     int tailleEnregLog, etatSuppression, idEnregLog;
+     sscanf(ptr, "%d||%d||%d", &tailleEnregLog, &etatSuppression, &idEnregLog);
+     printf("%d\n",idEnregLog);
+      
+
+     // Si l'ID correspond, vérifier l'état de suppression
+     if (idEnregLog == id) {
+        
+        // Décaler tous les enregistrements suivants vers la gauche
+        memmove(ptr, ptr+tailleEnregLog, block->dataBlock + block->entete.tailleDonnees - (ptr+tailleEnregLog));
+        block->entete.tailleDonnees -= tailleEnregLog; // Diminuer la taille des données
+        block->entete.nbrEnregistrementLogique--; // Diminuer le nombre d'enregistrements logiques
+        fichierTOV->entete.nbEnregistrementslogique--; // Diminuer le nombre total d'enregistrements logiques
+         //block->dataBlock[block->entete.tailleDonnees] = '\0';
+        break;
     }
-    return false;
+    ptr += tailleEnregLog;// Passer à l'enregistrement logique suivant
 }
-//fonction de suppression logique
-void supprimerLogique(fichierLogique* fichierLog, int matriculeRecherche) {
-    int i;
-    for(i = 0; i < fichierLog->nbrEnregistrementLogique; i++) {
-        if (fichierLog->classe[i].matricule == matriculeRecherche) {
-            break;
-        }
-    }
-
-    if (i == fichierLog->nbrEnregistrementLogique) {
-        printf("L'element avec le matricule %d n'existe pas.\n", matriculeRecherche);
-        return;
-    }
-
-    for(int j = i; j < fichierLog->nbrEnregistrementLogique - 1; j++) {
-        fichierLog->classe[j] = fichierLog->classe[j + 1];
-    }
-
-    fichierLog->nbrEnregistrementLogique--;
-
-    printf("L'element avec le matricule %d a ete supprime.\n", matriculeRecherche);
+afficherDonneesFichierTOv(fichierTOV);
 }
 
-
-
-
- 
-
-
-
+    }
 
 
 
@@ -365,11 +381,12 @@ int main(){
     }else{
      printf("l'element a etais trouver");
     }
+    
+supprimerPhysique(table,&fichier,2);
 
 
 
 }
-
 
 
 
