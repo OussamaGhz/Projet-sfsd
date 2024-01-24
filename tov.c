@@ -75,6 +75,42 @@ void afficherTableHachage(HashTable* table) {
         }
     }
 }
+void chargementFinal(FichierTOV* fichierTOV, const char* cheminFichierLogique) {
+    FILE* fichierLogique = fopen(cheminFichierLogique, "w");
+    if (fichierLogique == NULL) {
+        printf("Erreur lors de l'ouverture du fichier.\n");
+        return;
+    }
+
+    // Iterate over each block in FichierTOV
+    for (int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
+        EnregistrementPhysique* block = &(fichierTOV->enregistrements[i]);
+
+        // Traverse the logical records in the block
+        char* ptr = block->dataBlock;
+        while (ptr < block->dataBlock + block->entete.tailleDonnees) {
+            int tailleEnregLog, etatSuppression, idEnregLog;int k=1;
+            char nom[20], prenom[40], filiere[20];
+            int matricule;
+
+            sscanf(ptr, "%d||%d||%d||%[^|]||%[^|]||%d||%[^|]", &tailleEnregLog, &etatSuppression, &idEnregLog, nom, prenom, &matricule, filiere);
+
+            // Write the logical record to the file
+            fprintf(fichierLogique, "id: %d\n", idEnregLog);
+            fprintf(fichierLogique, "nom: %s\n", nom);
+            fprintf(fichierLogique, "prenom %d: %s\n",k, prenom);
+            fprintf(fichierLogique, "matricule: %d\n", matricule);
+            fprintf(fichierLogique, "filiere: %s\n", filiere);
+            fprintf(fichierLogique, "supprimerLogiquement: %d\n", etatSuppression);
+            fprintf(fichierLogique, "tailleDonneEnregistrement: %d\n", tailleEnregLog);
+
+            ptr += tailleEnregLog; // Move to the next logical record
+        }
+    }
+
+    fclose(fichierLogique);
+}
+
 void supprimerElement(HashTable* table, int cle) {
     int index = positiontab(cle);
     ElementTablHachabl* courant = table->tab[index];
@@ -99,6 +135,30 @@ void modifierIdBlock(HashTable* table, int cle, int nouveauIdBlock) {
     if (element != NULL) {
         element->idBlock = nouveauIdBlock;
     }
+}
+void ecrireEnteteFichierTOV(FichierTOV* fichierTOV, const char* cheminHeaderInfo) {
+    FILE* file = fopen(cheminHeaderInfo, "w");
+    if (file == NULL) {
+        printf("Failed to open the file.\n");
+        return;
+    }
+
+    // Write the header of the file
+    fprintf(file, "FichierTOV Header:\n");
+    fprintf(file, "nbEnregistrements: %d\n", fichierTOV->entete.nbEnregistrementslogique);
+    fprintf(file, "nbrBlock: %d\n", fichierTOV->entete.nbrBlock);
+    fprintf(file, "facteurdeblockage: %d\n", fichierTOV->entete.facteurdeblockage);
+    fprintf(file, "nextId: %d\n", fichierTOV->entete.nextId);
+
+    // Write the header of each block
+    for(int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
+        fprintf(file, "\nEnregistrementPhysique %d Header:\n", i);
+        fprintf(file, "id: %d\n", fichierTOV->enregistrements[i].entete.id);
+        fprintf(file, "tailleDonnees: %d\n", fichierTOV->enregistrements[i].entete.tailleDonnees);
+        fprintf(file, "nbrEnregistrementLogique: %d\n", fichierTOV->enregistrements[i].entete.nbrEnregistrementLogique);
+    }
+
+    fclose(file);
 }
 
 
@@ -261,7 +321,7 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
         for(int j = 0; j < n; j++) {
             enregLog.prenom[j] = malloc(20 * sizeof(char));
             printf("Enter prenom %d: ", j+1);
-            scanf("%s", enregLog.prenom[j]);//insertiondes prenom
+            scanf("%s", enregLog.prenom[j]);//insertion des prenom
             strcat(chaine,enregLog.prenom[j]);//concatenation des prenoms dans chaine
         }
 
@@ -343,14 +403,10 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
     afficherDonneesFichierTOv(fichierTOV);//affichage des donne de TOV pour verifier le succes de l'insertion
      afficherTableHachage(table);
 }
-void supprimerLogiquement(int nbrSuppression){
 
 
 
-
-}
-void suppressionStructuretemp(int nbrsuppression) {
-    int id;
+void suppressionStructuretemp(int id) {
     char cheminFichierLogique[] = "fichierLotest4.txt"; // Remplacez par le chemin vers votre fichier
     char cheminFichierTemp[] = "fichierLogiqueMouvement.txt"; // Remplacez par le chemin vers un fichier temporaire
     FILE* fichierLogique = fopen(cheminFichierLogique, "r");
@@ -362,10 +418,6 @@ void suppressionStructuretemp(int nbrsuppression) {
     }
 
     char ligne[256];
-    for (int i = 0; i < nbrsuppression; i++) {
-        printf("Entrez l'ID de l'étudiant à supprimer: ");
-        scanf("%d", &id);
-
         while (fgets(ligne, sizeof(ligne), fichierLogique)) {
             int idLigne;
             sscanf(ligne, "id: %d", &idLigne);
@@ -379,62 +431,48 @@ void suppressionStructuretemp(int nbrsuppression) {
         fclose(fichierTemp);
         remove(cheminFichierLogique);
         rename(cheminFichierTemp, cheminFichierLogique);
-        fichierLogique = fopen(cheminFichierLogique, "r");
-        fichierTemp = fopen(cheminFichierTemp, "w");
-    }
-
-    fclose(fichierLogique);
-    fclose(fichierTemp);
-    remove(cheminFichierTemp);
 }
 
+void suppressionLogique(HashTable* table, FichierTOV* fichierTOV, int id) {
+    // Search for the element in the hash table
+    ElementTablHachabl* element = rechercherElement(table, id);
+    if (element == NULL) {
+        printf("Cet élément n'existe pas.\n");
+        return;
+    }
 
+    // Find the corresponding block in FichierTOV
+    int idBlock = element->idBlock;
+    EnregistrementPhysique* block = &(fichierTOV->enregistrements[idBlock]);
 
+    // Traverse the logical records in the block
+    char* ptr = block->dataBlock;
+    while (ptr < block->dataBlock + block->entete.tailleDonnees) {
+        int tailleEnregLog, etatSuppression, idEnregLog;
+        sscanf(ptr, "%d||%d||%d", &tailleEnregLog, &etatSuppression, &idEnregLog);
 
-/*void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppression) {
-    int id;
-    for (int i = 0; i < nbrSuppression; i++) {
-       printf("Entrez l'ID de l'étudiant à supprimer: ");
-        scanf("%d", &id);
+        // If the ID matches, check the etatSuppression
+        if (idEnregLog == id) {
+            if (etatSuppression == 0) {
+                // Set etatSuppression to 1
+                char* etatSuppressionPtr = strstr(ptr, "||") + 2;
+                *etatSuppressionPtr = '1';
 
-     // Rechercher l'ID dans la table de hachage
-        ElementTablHachabl* element = rechercherElement(table, id);
-        if (element == NULL) {
-            printf("Cet élément n'existe pas.\n");
-            continue;
+                // Call suppressionStructuretemp function to remove the record
+                suppressionStructuretemp(id);
+            } else {
+                printf("Cet élément n'existe pas logiquement.\n");
+            }
+            break;
         }
-        // Trouver le bloc correspondant dans FichierTOV
-        int idBlock = element->idBlock;
-        EnregistrementPhysique* block = &(fichierTOV->enregistrements[idBlock]);
-        printf("%d",element->id);
-        printf("%d\n",idBlock);
-        // Parcourir les enregistrements logiques dans le bloc
-        
-     char* ptr = block->dataBlock;
-     while (ptr < block->dataBlock + block->entete.tailleDonnees) {
-     int tailleEnregLog, etatSuppression, idEnregLog;
-     sscanf(ptr, "%d||%d||%d", &tailleEnregLog, &etatSuppression, &idEnregLog);
-     printf("%d\n",idEnregLog);
-      
-
-     // Si l'ID correspond, vérifier l'état de suppression
-     if (idEnregLog == id) {
-        
-        // Décaler tous les enregistrements suivants vers la gauche
-        memmove(ptr, ptr+tailleEnregLog, block->dataBlock + block->entete.tailleDonnees - (ptr+tailleEnregLog));
-        block->entete.tailleDonnees -= tailleEnregLog; // Diminuer la taille des données
-        block->entete.nbrEnregistrementLogique--; // Diminuer le nombre d'enregistrements logiques
-        fichierTOV->entete.nbEnregistrementslogique--; // Diminuer le nombre total d'enregistrements logiques
-         //block->dataBlock[block->entete.tailleDonnees] = '\0';
-        break;
+        ptr += tailleEnregLog; // Move to the next logical record
     }
-    ptr += tailleEnregLog;// Passer à l'enregistrement logique suivant
-}
-afficherDonneesFichierTOv(fichierTOV);
 }
 
-    }
-*/
+
+
+
+
 void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppression) {
     int id;
     for (int i = 0; i < nbrSuppression; i++) {
@@ -459,9 +497,13 @@ void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppress
             int tailleEnregLog, etatSuppression, idEnregLog;
             sscanf(ptr, "%d||%d||%d", &tailleEnregLog, &etatSuppression, &idEnregLog);
             printf("%d\n",idEnregLog);
-
             // Si l'ID correspond, vérifier l'état de suppression
             if (idEnregLog == id) {
+                if (etatSuppression == 0) {
+        etatSuppression = 1;
+        sprintf(ptr, "%d||%d||%d", tailleEnregLog, etatSuppression, idEnregLog);
+        suppressionStructuretemp(idEnregLog);                                  
+    }
                 // Décaler tous les enregistrements suivants vers la gauche
                 memmove(ptr, ptr+tailleEnregLog, block->dataBlock + block->entete.tailleDonnees - (ptr+tailleEnregLog));
                 block->entete.tailleDonnees -= tailleEnregLog; // Diminuer la taille des données
@@ -492,9 +534,11 @@ void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppress
             ptr += tailleEnregLog; // Passer à l'enregistrement logique suivant
         }
          if (block->entete.nbrEnregistrementLogique == 0) {
-        fichierTOV->entete.nbrBlock--; // Décrémenter le nombre de blocs
+        fichierTOV->entete.nbrBlock--;
+        fichierTOV->entete.nextId--; // Décrémenter le nombre de blocs et le nextid
     }
         afficherDonneesFichierTOv(fichierTOV);
+        ecrireEnteteFichierTOV(fichierTOV,"headerInftest4.txt");
     }
 }
 
@@ -510,13 +554,9 @@ int main(){
     HashTable* table = initialiserHachable();
     initialiserFichierTOV(&fichier,2,&fichier2);
     insertionLogique(table,&fichier2,&fichier,0,2,"fichierLotest4.txt","headerInftest4.txt");
-    if(rechercherElement(table,1)==NULL){
-        printf("l'element n'existe pas");
-    }else{
-     printf("l'element a etais trouver");
-    }
-    
+    suppressionLogique(table,&fichier,3);
    supprimerPhysique(table,&fichier,2);
+   chargementFinal(&fichier,"fichierLotest4.txt");
 
 }
 
