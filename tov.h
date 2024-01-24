@@ -13,48 +13,63 @@
 
 
 
-/**
- * Structure te3 l'entête enregistrement physique
- * Contient l'ID de l'enregistrement et la taille des donnees.
- */
+/*sert a fournir des informations de base sur chaque enregistrement comme son id qui est important
+pour le suivi des enregistrements dans le fichier et la table de hachage*/
+
 typedef struct {
-    int id;
-    int tailleBlocR; //taille block reel
+    int id; //ce champ est utilise pour identifier de maniere unique chaque enregistrement dans le fichier TOV (its used in most functions)
+    int tailleBlocR; //taille block reel ( not used in code , it had a role apr the idea was canceled)
 } EnteteEnregistrement;
 
 
 //adding new champs à l'enregistrement physique
 typedef struct {
     EnteteEnregistrement entete;
+    //ces trois champs representent les donnees stockees dans chaque enregistrement:
     char data1[TAILLE_MAX_ENREGISTREMENT];
     char data2[TAILLE_MAX_ENREGISTREMENT];
     char data3[TAILLE_MAX_ENREGISTREMENT];
+    //chaque data peut stocker une chaine de caracteres de n'importe quelle taille mais < TAILLE_MAX_ENREGISTREMENT
+    //donc la taille est variable
 } EnregistrementPhysique;
 
 
+//cette structure est utilisee pour implementer une table de hachage
 typedef struct {
+    /*les indices are calculated by hash function and id of enregistrements are stocked here*/
     int *table;
-    int taille;
+    //ce champ (taille) stocke la taille de la table de hachage, cad le nombre d'elements qu'elle peut contenir
+    int taille;t
 } HashTable;
 
 
+//cette structure represente les informations globales concernant le fichier TOV
 typedef struct {
-    int nbEnregistrements;
-    int capaciteMax;
-    int nextID; // nouveau champ pour suivre l'id global
+    int nbEnregistrements; //ce champ stocke le nombre actuel d'enregistrements dans le fichier TOV
+    int capaciteMax;       //le nombre maximum d'enregistrements que le fichier peut contenir
+    int nextID;            // nouveau champ pour suivre l'id global
 } EnteteFichierTOV;
 
-// Structure te3 buffer de transmission
+
+
+//Structure te3 buffer de transmission
 typedef struct {
+    //c un tableau de caracteres used pour stocker temporairement des donnees a transmettre
     char data[TAILLE_BUFFER];
+    // Ce champ is used pour suivre la quantite de donnees actuellement stockees dans le tampon
     int taille;
 } BufferTransmission;
 
-// Structure pour le fichier TOV sans chevauchement
+
+
+//cette structure represente le fichier TOV
 typedef struct {
     EnteteFichierTOV entete;
-    EnregistrementPhysique *enregistrements; //to change , nehi el pointeur w diro tableau
+    //c un pointeur vers un tableau d'enregistrements physiques , ce tableau stocke les enregistrements individuels contenus dans le fichier TOV
+    EnregistrementPhysique *enregistrements;
 } FichierTOV;
+
+
 
 // Prototypes de fonctions pour la gestion du fichier TOV
 
