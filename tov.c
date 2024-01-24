@@ -122,7 +122,7 @@ void on_button_add_clicked(GtkButton *button, gpointer user_data)
 {
     printf("Add button was clicked\n");
 
-    GtkBuilder *builder = GTK_BUILDER(user_data);
+    GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
     GtkWidget *modal_window = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_modal"));
     GtkWidget *confirm_button = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
 
