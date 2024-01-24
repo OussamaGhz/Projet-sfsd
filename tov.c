@@ -3,22 +3,25 @@
 /*                                                            *  DONE  BY JINX  *                                                        */
 
 
-//nouvelle fonction d'initialisation de la table hashage:
+//nouvelle fonction d'initialisation de la table hashage:          (checked)
 void initialiserHashTable(HashTable *hashTable, int taille) {
+    //j'alloue de la memoire pour le tableau de la table de hachage
     hashTable->table = malloc(taille * sizeof(int));
     for (int i = 0; i < taille; i++) {
-        hashTable->table[i] = -1;  //if empty then -1
+        hashTable->table[i] = -1;  //on les mets tous à -1 pour les declarer vide
     }
-    hashTable->taille = taille;
+    hashTable->taille = taille; //la taille de la table de hachage
 }
 
 //it's role est de transformer un ID en un indice
 int hashFunction(int id, int tailleTable) {
+    //simple hach use of modulo
+    //this will assure que l'indice is always dans les limites de la table de hachage (de 0 a tailleTable - 1).
     return id % tailleTable;
 }
 
 
-//initialisation du fichierTOV
+//initialisation du fichierTOV                           (checked)
 void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 
     //verifie si le pointeur fichier est NULL
@@ -48,7 +51,7 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax) {
 }
 
 
-//remaking the function libierFichierTOV and fixing it's problems
+//remaking the function libierFichierTOV and fixing it's problems         (checked)
 void libererFichierTOV(FichierTOV *fichier) {
     //verifier si le fichier est null
     if (fichier == NULL) {
@@ -71,7 +74,7 @@ void libererFichierTOV(FichierTOV *fichier) {
 
 
 
-//reconstruction de la fonction ajouter enregistrement
+//la fonction d'insertion                  (checked)
 bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement) {
 
     //verification si les 2 pointeurs sont NULL pour eviter des erreurs de segmentation
@@ -79,7 +82,7 @@ bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, Enregistre
 
     const char *nomFichier = "monFichierTOV.tov";
 
-    FILE *fichierPhysique = fopen(nomFichier, "a");
+    FILE *fichierPhysique = fopen(nomFichier, "a"); //we write à la fin du fichier sans ecraser son contenu actuel
     if (fichierPhysique == NULL) return false;
 
      //check la capacite maximale avant d'inserer
@@ -89,7 +92,7 @@ bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, Enregistre
     }
 
     //en ajoutant cette linge de code , le probleme de id is fixed :)
-    enregistrement->entete.id = fichier->entete.nextID++;
+    enregistrement->entete.id = fichier->entete.nextID++; //chaque fois on ajoute un enregistrement on incremente
 
     //ecrire les donnees de l'enregistrement dans le fichier
     fprintf(fichierPhysique, "%d|%s|%s|%s\n",
@@ -105,14 +108,14 @@ bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, Enregistre
     fclose(fichierPhysique);
 
     //mise à jour de la table de hashage
-    int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille);
+    int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille); //appelle la fonction hashFunction, en lui passant l'id de l'enregistrement
     hashTable->table[indexHash] = enregistrement->entete.id;
 
     return true;
 }
 
 
-//supprimer un enregistrement specified with his ID du fichier TOV:
+//supprimer un enregistrement specified with his ID du fichier TOV:     (checked)
 bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) {
 
     const char *nomFichier = "monFichierTOV.tov";
@@ -179,7 +182,7 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) 
 
     //same thing kima wch derna f la fonction ajouter enregistrement
     int indexHash = hashFunction(id, hashTable->taille);
-    //bch nbyno beli cet emplacement est vide dans la table de hashage
+    //bch nbyno beli cet emplacement est vide dans la table de hashage apres la suppresion
     hashTable->table[indexHash] = -1;
 
     return found;
