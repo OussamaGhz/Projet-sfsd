@@ -23,10 +23,15 @@
             <property name="width-request">580</property>
             <property name="height-request">550</property>
             <property name="visible">True</property>
-            <property name="label">Hello there</property>
+            <property name="label">Hello there. 
+  Try to create a file to continue.
+            </property>
             <property name="wrap">true</property>
+            <!-- Center align the text -->
+            <property name="justify">center</property>
           </object>
         </child>
+
         <child>
           <!-- Horizontal Box for buttons -->
           <object class="GtkBox" id="hbox_buttons">
@@ -59,6 +64,15 @@
             <child>
               <object class="GtkButton" id="button_show_content">
                 <property name="label">Show Content</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_search">
+                <property name="label">Search</property>
                 <property name="width-request">150</property>
                 <property name="height-request">100</property>
                 <property name="sensitive">True</property>

@@ -12,20 +12,20 @@ static gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer user_data
 
     // Split the content into blocks
     char *token = strtok(file_content, "\n");
-    int block_height = 30; // Height of each block
-    int y = 20;            // Initial y position
+    int block_height = 30; 
+    int y = 20;            
 
     while (token != NULL)
     {
         // Draw a rectangular block
         cairo_rectangle(cr, 20, y, 200, block_height);
-        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0); // Set color (black)
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
         cairo_fill(cr);
 
         // Draw the element text inside the block
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0); // Set color (white)
-        cairo_move_to(cr, 30, y + 20);            // Position for text
-        cairo_show_text(cr, token);               // Display the element
+        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        cairo_move_to(cr, 30, y + 20);            
+        cairo_show_text(cr, token);               
 
         // Move to the next block position
         y += block_height + 10; // Add spacing between blocks

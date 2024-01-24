@@ -11,6 +11,7 @@ void on_button_create_clicked(GtkButton *button, gpointer user_data);
 void on_button_add_clicked(GtkButton *button, gpointer user_data);
 void on_button_delete_clicked(GtkButton *button, gpointer user_data);
 void on_button_show_content_clicked(GtkButton *button, gpointer user_data);
+void on_button_search_clicked(GtkButton *button, gpointer user_data);
 void on_button_quit_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data);
@@ -24,6 +25,7 @@ GtkWidget *button_add;
 GtkWidget *button_delete;
 GtkWidget *button_show_content;
 GtkWidget *button_create;
+GtkWidget *button_search;
 
 FichierTOV fichier;
 HashTable hashTable;
@@ -38,7 +40,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *modal_window;
     GtkWidget *modal_window_inf;
     GtkWidget *button_confirm_delete;
-    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create;
+    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create, *button_search;
     GtkWidget *label_content;
 
     // Initialize your TOV file (replace with actual initialization)
@@ -56,6 +58,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_add = GTK_WIDGET(gtk_builder_get_object(builder, "button_add"));
     button_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_delete"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(builder, "button_show_content"));
+    button_search = GTK_WIDGET(gtk_builder_get_object(builder, "button_search"));
     button_quit = GTK_WIDGET(gtk_builder_get_object(builder, "button_quit"));
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
@@ -64,7 +67,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
 
-    if (!button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete)
+    if (!button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete || !button_search)
     {
         g_printerr("Failed to fetch widgets from the Glade file\n");
         g_object_unref(builder);
@@ -76,6 +79,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     g_signal_connect(button_add, "clicked", G_CALLBACK(on_button_add_clicked), builder);
     g_signal_connect(button_delete, "clicked", G_CALLBACK(on_button_delete_clicked), builder);
     g_signal_connect(button_show_content, "clicked", G_CALLBACK(on_button_show_content_clicked), builder);
+    g_signal_connect(button_search, "clicked", G_CALLBACK(on_button_search_clicked), builder);
     g_signal_connect(button_quit, "clicked", G_CALLBACK(on_button_quit_clicked), builder);
     g_signal_connect(button_confirm, "clicked", G_CALLBACK(on_button_confirm_clicked), builder);
     g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), builder);
@@ -179,17 +183,26 @@ void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data)
 
     initialiserHashTable(&hashTable, capaciteFichier);
 
+    // Get the label widget where you want to display the new message
+    GtkWidget *label_content = GTK_WIDGET(gtk_builder_get_object(main_builder, "label_content"));
+
+    // Set the new message for the label
+    const char *new_message = "Great, file has been created successfully!\n Now try to add some content to your file.";
+    gtk_label_set_text(GTK_LABEL(label_content), new_message);
+
     // Get the buttons where you want to set visibility
     button_add = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_add"));
     button_delete = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_delete"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_show_content"));
     button_show_content = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_show_content"));
+    button_search = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_search"));
     button_create = GTK_WIDGET(gtk_builder_get_object(main_builder, "button_create"));
 
     // Set the visibility of these buttons to TRUE
     gtk_widget_set_visible(button_add, TRUE);
     gtk_widget_set_visible(button_delete, TRUE);
     gtk_widget_set_visible(button_show_content, TRUE);
+    gtk_widget_set_visible(button_search, TRUE);
     gtk_widget_set_visible(button_create, FALSE);
 
     // Hide the modal window after confirming
@@ -327,6 +340,11 @@ void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
 
     // Free the allocated memory for content_text
     g_free(content_text);
+}
+
+void on_button_search_clicked(GtkButton *button, gpointer user_data)
+{
+    printf("seatch button created");
 }
 
 void on_button_delete_clicked(GtkButton *button, gpointer user_data)
