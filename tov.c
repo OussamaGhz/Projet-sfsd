@@ -188,12 +188,13 @@ bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) 
     return found;
 }
 
-//reconstruction de la fonction de recherche based on the new changings
+
+//fonction de recherche optimised to perfection using hachage:        (checked)
 EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) {
     if (fichier == NULL || hashTable == NULL) {
         return NULL;
     }
-
+    /*calcule l'indice dans la table de hachage pour l'id donne en utilisant la fonction de hachage*/
     int index = hashFunction(id, hashTable->taille);
     
     //verifying if id is stocked at the this index
@@ -205,17 +206,14 @@ EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable 
             }
         }
     }
-
     return NULL; //enregistrement not found
 }
 
 
-
-
-//fonction pour afficher le contenue de fichier:
+//fonction pour afficher le contenue de fichier: (pas importante while using GTK)     (checked)
 void afficherFichierTOV(const FichierTOV *fichier) {
     if (fichier == NULL) return;
-    //bouvle simple pour afficher les enregistrement et leur contenue
+    //boucle simple pour afficher les enregistrement et leur contenue 
     printf("Fichier TOV contient %d enregistrements:\n", fichier->entete.nbEnregistrements);
     for (int i = 0; i < fichier->entete.nbEnregistrements; i++) {
         printf("Enregistrement %d:\n", i);
@@ -226,22 +224,27 @@ void afficherFichierTOV(const FichierTOV *fichier) {
 }
 
 
-//utiliser le buffer pour gerer le tampon de transmission avec ces 2 fonctions
-//Explication later
+//utiliser le buffer pour gerer le tampon de transmission avec ces 2 fonctions   (checked)
 void remplirBuffer(BufferTransmission *buffer, const char *data) {
     if (buffer == NULL || data == NULL) return;
-
-    strncpy(buffer->data, data, TAILLE_BUFFER);
+    //copy data to the buffer, leaving space for the null terminator
+    strncpy(buffer->data, data, TAILLE_BUFFER - 1);
+    //explicitly set the last character to '\0' for null termination
     buffer->data[TAILLE_BUFFER - 1] = '\0';
+    //Update the size of the data in the buffer
     buffer->taille = strlen(buffer->data);
 }
 
-void viderBuffer(BufferTransmission *buffer) {
-    if (buffer == NULL) return;
 
-    memset(buffer->data, 0, TAILLE_BUFFER);
+
+void viderBuffer(BufferTransmission *buffer) {    //(checked)
+    if (buffer == NULL) return;
+    //set the first character of the buffer to '\0' pour indiquer an empty string
+    buffer->data[0] = '\0';
+    //reset the size of the data in the buffer to 0
     buffer->taille = 0;
 }
+
 
 
 //une fonction pas demandee , j vais l'utiliser juste pour calculer la taille des diff enregistrements
@@ -252,7 +255,7 @@ unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregis
 }
 
 
-//Le programme a un probleme avec le fichier physique , nriglih omba3d
+
 //utiliser les fonctions dans main
 int main() {
     //explication des variables
