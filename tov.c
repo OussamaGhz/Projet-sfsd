@@ -431,48 +431,61 @@ void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data)
 
 void on_button_confirm_search_clicked(GtkButton *button, gpointer user_data)
 {
-    // GtkBuilder *builder = GTK_BUILDER(user_data);
-    // GtkWidget *modal_window_search = GTK_WIDGET(gtk_builder_get_object(builder, "search_modal"));
-    // GtkWidget *id_search_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_search_entry_search"));
-    // GtkWidget *search_label = GTK_WIDGET(gtk_builder_get_object(builder, "search_label"));
+    GtkBuilder *builder = GTK_BUILDER(user_data);
+    GtkWidget *modal_window_search = GTK_WIDGET(gtk_builder_get_object(builder, "search_modal"));
+    GtkWidget *id_search_entry = GTK_WIDGET(gtk_builder_get_object(builder, "id_search_entry_search"));
+    GtkWidget *search_label = GTK_WIDGET(gtk_builder_get_object(builder, "search_label"));
 
-    // // Debugging output
-    // if (!id_search_entry)
-    // {
-    //     g_printerr("Search entry widget not found\n");
-    //     return;
-    // }
-    // if (!GTK_IS_EDITABLE(id_search_entry))
-    // {
-    //     g_printerr("Widget is not GtkEditable\n");
-    //     return;
-    // }
+    if (!search_label)
+    {
+        return;
+    }
+    
 
-    // const char *id_text_search = gtk_editable_get_text(GTK_EDITABLE(id_search_entry));
+    // Check if search entry widget is valid
+    if (!id_search_entry || !GTK_IS_EDITABLE(id_search_entry))
+    {
+        g_printerr("Search entry widget is not valid\n");
+        return;
+    }
 
-    // // Print the input for debugging
-    // printf("Input ID for search: %s\n", id_text_search);
+    // Check if search label widget is valid
+    if (!search_label || !GTK_IS_LABEL(search_label))
+    {
+        g_printerr("Search label widget is not valid\n");
+        return;
+    }
 
-    // int id = atoi(id_text_search);
+    const char *id_text_search = gtk_editable_get_text(GTK_EDITABLE(id_search_entry));
+    printf("Input ID for search: %s\n", id_text_search); // Debugging output
 
-    // EnregistrementPhysique *foundRecord = rechercherEnregistrement(&fichier, &hashTable, id);
-    // if (foundRecord != NULL)
-    // {
-    //     // Assuming EnregistrementPhysique has fields like id, data1, data2, data3, etc.
-    //     char label_text[1024]; // Adjust size as needed for your data
-    //     snprintf(label_text, sizeof(label_text), "Record Found:\nID: %d\nField1: %s\nField2: %s",
-    //              foundRecord->data1,
-    //              foundRecord->data2,
-    //              foundRecord->data3);
-    //     gtk_label_set_text(GTK_LABEL(search_label), label_text);
-    // }
-    // else
-    // {
-    //     gtk_label_set_text(GTK_LABEL(search_label), "ID Not Found");
-    // }
+    int id = atoi(id_text_search);
+    EnregistrementPhysique *foundRecord = rechercherEnregistrement(&fichier, &hashTable, id);
 
-    // // Close the search modal window
-    // gtk_widget_set_visible(modal_window_search, FALSE);
+    if (foundRecord != NULL)
+    {
+        // Debugging output to check the found record
+        printf("Found Record: ID: %s, First name: %s, Second name: %s\n",
+               foundRecord->data3,
+               foundRecord->data1,
+               foundRecord->data2);
+
+        char label_text[1024];
+        snprintf(label_text, sizeof(label_text), "Record Found:\nID: %s, FirstName: %s, SecondName: %s \n",
+                 foundRecord->data3,
+                 foundRecord->data1,
+                 foundRecord->data2);
+        printf("%s", label_text);
+        gtk_label_set_text(GTK_LABEL(search_label), label_text);
+        gtk_widget_set_visible(search_label, true);
+
+    }
+    else
+    {
+        gtk_label_set_text(GTK_LABEL(search_label), "ID Not Found");
+    }
+
+    gtk_widget_set_visible(modal_window_search, FALSE);
 }
 
 int main(int argc, char *argv[])

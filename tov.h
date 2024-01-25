@@ -16,10 +16,6 @@
 /*sert a fournir des informations de base sur chaque enregistrement comme son id qui est important
 pour le suivi des enregistrements dans le fichier et la table de hachage*/
 
-/**
- * Structure te3 l'entête enregistrement physique
- * Contient l'ID de l'enregistrement et la taille des donnees.
- */
 typedef struct {
     int id; //ce champ est utilise pour identifier de maniere unique chaque enregistrement dans le fichier TOV (its used in most functions)
     int tailleBlocR; //taille block reel ( not used in code , it had a role apr the idea was canceled)
@@ -35,13 +31,6 @@ typedef struct {
     char data3[TAILLE_MAX_ENREGISTREMENT];
     //chaque data peut stocker une chaine de caracteres de n'importe quelle taille mais < TAILLE_MAX_ENREGISTREMENT
     //donc la taille est variable
-//j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
-typedef struct {
-    EnteteEnregistrement entete;
-    char *data1; /*tout ces 3 champs pointent vers un tableau de caracteres*/
-    char *data2;
-    char *data3;
-    //tout ces champs
 } EnregistrementPhysique;
 
 
