@@ -72,5 +72,11 @@ typedef struct HashTable {
 } HashTable;
 
 
+typedef struct {
+    int blockId;
+    int recordId;
+    char nom[20];
+} RecordIndex;
+
 
 #endif

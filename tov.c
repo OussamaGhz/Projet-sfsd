@@ -321,7 +321,7 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
    //fonction d'insertion logique et phisique dans un fichier
    void insertionLogique(HashTable* table,fichierLogique* fichierLog, FichierTOV* fichierTOV, int nbrInsertion, int facteurDeBlocage, const char* cheminFichierLogique, const char* cheminHeaderInfo) {
     //chargement des donne +affichage des donne charge
-    chargerDonnees(table,fichierTOV, fichierLog, cheminFichierLogique, cheminHeaderInfo);
+    
     afficherDonneesFichierTOV(fichierTOV);
     afficherTableHachage(table);
     int currentBlock=0;
@@ -569,18 +569,112 @@ void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppress
     }
 }
 
+
 int main(){
 
-    fichierLogique fichier2;
-    FichierTOV fichier;
-    int facteurDeBlockage;
-    HashTable* table = initialiserHachable();
-    initialiserFichierTOV(&fichier,2,&fichier2);
-    insertionLogique(table,&fichier2,&fichier,2,2,"fichierLotest4.txt","headerInftest4.txt");
-    suppressionLogique(table,&fichier,3);
-   supprimerPhysique(table,&fichier,2);
-   chargementFinal(&fichier,"fichierLotest4.txt");
    
+   fichierLogique fichier2;
+    FichierTOV fichier;
+    int facteurDeBlockage,nbrinsertion;
+    HashTable* table = initialiserHachable();
+    char* nomFichierHeader = "headerInftest4.txt";
+    char* nomFichierdonne = "fichierLotest4.txt";
+
+    printf("veillier saisir les parametre :\n");
+    printf("entrer votre facteur de blockage : ");
+    scanf("%d",&facteurDeBlockage);
+    initialiserFichierTOV(&fichier,facteurDeBlockage,&fichier2);
+    printf("\n");
+    printf("par default vos fichier sont fichierLotest4.txt et headerInftest4.txt vous pouvais les modifier dans les parametrages\n");
+    chargerDonnees(table,&fichier,&fichier2,"fichierLotest4.txt","headerInftest4.txt");
+
+    int choix;
+    while(1) {
+        printf("Menu :\n");
+        printf("1. Insertion\n");
+        printf("2. Suppression\n");
+        printf("3. Affichage\n");
+        printf("4. Quitter\n");
+        printf("5. Paramétrage\n");
+        printf("Entrez votre choix : ");
+        scanf("%d", &choix);
+
+        switch(choix) {
+            case 1:
+                printf("Vous avez choisi l'insertion.\n");
+                printf("rentrer le nombre d'element que vous voulez inserer : ");
+                scanf("%d",&nbrinsertion);
+                insertionLogique(table,&fichier2,&fichier,nbrinsertion,facteurDeBlockage,nomFichierdonne,nomFichierHeader);
+                break;
+            case 2:
+                printf("Vous avez choisi la suppression.\n");
+                printf("1. Suppression logique\n");
+                printf("2. Suppression physique\n");
+                printf("Entrez votre choix : ");
+                int choixSuppression;
+                scanf("%d", &choixSuppression);
+                switch(choixSuppression) {
+                    case 1:
+                    int id;
+                        printf("Vous avez choisi la suppression logique.\n");
+                        printf("rentrer l'id que vous voulez supprimer : ");
+                        scanf("%d",&id);
+                        printf("\n");
+                        suppressionLogique(table,&fichier,id);
+                        break;
+                    case 2:
+                    int nbrSuppression;
+                        printf("Vous avez choisi la suppression physique.\n");
+                        printf("rentrer le nombre de suppression : ");
+                        scanf("%d",&nbrSuppression);
+                        supprimerPhysique(table,&fichier,nbrSuppression);
+                        chargementFinal(&fichier,nomFichierdonne);
+                        break;
+                    default:
+                        printf("Choix invalide. Veuillez réessayer.\n");
+                }
+                break;
+            case 3:
+                printf("Vous avez choisi l'affichage.\n");
+                afficherDonneesFichierTOv(&fichier);
+                afficherTableHachage(table);
+                break;
+            case 4:
+                printf("Au revoir !\n");
+                chargementFinal(&fichier,nomFichierdonne);
+                return 0;
+
+            case 5:
+                printf("Vous avez choisi le paramétrage.\n");
+                printf("Paramétrage :\n");
+                printf("1. Choisir facteur de blocage\n");
+                printf("2. Nom fichierlogique.txt\n");
+                printf("3. Nom header.txt\n");
+                printf("Entrez votre choix : ");
+                int choixParam;
+                scanf("%d", &choixParam);
+                switch(choixParam) {
+                    case 1:
+                        printf("Vous avez choisi de modifier le facteur de blocage.\n");
+                    scanf("%d",&facteurDeBlockage);
+                     break;
+                     case 2:
+                        printf("Vous avez choisi de modifier le nom de fichierlogique.txt.\n");
+                    break;
+                    case 3:
+                        printf("Vous avez choisi de modifier le nom de header.txt.\n");
+                        break;
+                     default:
+                        printf("Choix invalide. Veuillez réessayer.\n");
+                }
+                break;
+            default:    
+            
+                printf("Choix invalide. Veuillez réessayer.\n");
+        }
+    }
+
+    return 0;
 }
 
 
@@ -588,6 +682,91 @@ int main(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*void trieTov(FichierTOV* fichierTOV,FichierTOV* fichier2){
+
+        int index=0;
+    RecordIndex* indices = malloc(fichierTOV->entete.nbEnregistrementslogique * sizeof(RecordIndex));
+    for(int i=0;i<fichierTOV->entete.nbrBlock;i++){
+    EnregistrementPhysique* block = &(fichierTOV->enregistrements[i]);
+    char* ptr = block->dataBlock;
+while (ptr < block->dataBlock + block->entete.tailleDonnees) {
+                int tailleEnregLog, etatSuppression, idEnregLog;
+    char nom[20];
+    sscanf(ptr, "%d||%d||%d||%[^|]||", &tailleEnregLog, &etatSuppression, &idEnregLog, nom);
+    // Insérer les informations dans la structure indices
+            indices[index].blockId = i;
+            indices[index].recordId = idEnregLog;
+            strcpy(indices[index].nom, nom);
+            index++;
+     
+         ptr += tailleEnregLog;
+
+        }//fin de la copie de donne
+    }
+
+        //trie a bulle
+for (int i = 0; i < fichierTOV->entete.nbEnregistrementslogique-1; i++) {
+    for (int j = 0; j < fichierTOV->entete.nbEnregistrementslogique-i-1; j++) {
+        if (strcmp(indices[j].nom, indices[j+1].nom) > 0) {
+            // Échanger les indices
+            RecordIndex temp = indices[j];
+            indices[j] = indices[j+1];
+            indices[j+1] = temp;
+        }
+    }
+}
+//initialiserFichierTOV(&fichier2,2,&fichier3);
+
+    int k=0;
+    for (int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
+    EnregistrementPhysique* block2 = &(fichier2->enregistrements[i]);
+
+    for (int j = 0; j < fichierTOV->enregistrements[i].entete.nbrEnregistrementLogique; j++) {
+
+    int id=indices[k].recordId;
+    int idblock=indices[k].blockId;
+    EnregistrementPhysique* block1 = &(fichierTOV->enregistrements[idblock]);
+    int tailleEnregLog;
+    char* ptr = block1->dataBlock;
+        for (int j = 0; j < id; j++) {
+            sscanf(ptr, "%d||", &tailleEnregLog);
+            ptr += tailleEnregLog;
+        }
+    memcpy(block2->dataBlock + block2->entete.tailleDonnees, ptr,tailleEnregLog);
+    fichier2->enregistrements[i].entete.id=i;
+    fichier2->enregistrements[i].entete.nbrEnregistrementLogique++;
+    fichier2->enregistrements[i].entete.tailleDonnees+=tailleEnregLog;
+    fichier2->entete.nbEnregistrementslogique++;
+}
+fichier2->entete.nbrBlock++;
+fichier2->entete.nextId++;
+
+}
+afficherDonneesFichierTOv(fichier2);
+    }
+*/
 
 
 
