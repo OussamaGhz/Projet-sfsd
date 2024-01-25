@@ -16,6 +16,7 @@ void on_button_quit_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_create_clicked(GtkButton *button, gpointer user_data);
 void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data);
+void on_button_confirm_search_clicked(GtkButton *button, gpointer user_data);
 
 void initialiserHashTable(HashTable *hashTable, int taille);
 
@@ -40,7 +41,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *modal_window;
     GtkWidget *modal_window_inf;
     GtkWidget *button_confirm_delete;
-    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create, *button_search;
+    GtkWidget *button_add, *button_create, *button_delete, *button_show_content, *button_quit, *button_confirm, *button_confirm_create, *button_search, *button_confirm_search;
     GtkWidget *label_content;
 
     // Initialize your TOV file (replace with actual initialization)
@@ -63,11 +64,12 @@ static void activate(GtkApplication *app, gpointer user_data)
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
     button_confirm_delete = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_delete"));
+    button_confirm_search = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_search"));
     label_content = GTK_WIDGET(gtk_builder_get_object(builder, "label_content"));
     button_confirm = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm"));
     button_confirm_create = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_create"));
 
-    if (!button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete || !button_search)
+    if (!button_create || !button_add || !button_delete || !button_show_content || !button_quit || !button_confirm || !button_confirm_create || !button_confirm_delete || !button_search || !button_confirm_search)
     {
         g_printerr("Failed to fetch widgets from the Glade file\n");
         g_object_unref(builder);
@@ -84,6 +86,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     g_signal_connect(button_confirm, "clicked", G_CALLBACK(on_button_confirm_clicked), builder);
     g_signal_connect(button_confirm_create, "clicked", G_CALLBACK(on_button_confirm_create_clicked), builder);
     g_signal_connect(button_confirm_delete, "clicked", G_CALLBACK(on_button_confirm_delete_clicked), builder);
+    g_signal_connect(button_confirm_search, "clicked", G_CALLBACK(on_button_confirm_search_clicked), builder);
 
     modal_window = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_modal"));
     modal_window_inf = GTK_WIDGET(gtk_builder_get_object(builder, "information_modal"));
@@ -345,6 +348,20 @@ void on_button_show_content_clicked(GtkButton *button, gpointer user_data)
 void on_button_search_clicked(GtkButton *button, gpointer user_data)
 {
     printf("seatch button created");
+    // Declare the modal and confirm button locally
+    GtkBuilder *builder = gtk_builder_new_from_file("design.glade");
+    GtkWidget *modal_window_search = GTK_WIDGET(gtk_builder_get_object(builder, "search_modal"));
+    GtkWidget *button_confirm_search = GTK_WIDGET(gtk_builder_get_object(builder, "button_confirm_search"));
+
+    // Set parent window for the modal
+    GtkWindow *parent_window = GTK_WINDOW(gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW));
+    gtk_window_set_transient_for(GTK_WINDOW(modal_window_search), parent_window);
+
+    // Set the modal window for the "Confirm" button
+    g_signal_connect(button_confirm_search, "clicked", G_CALLBACK(on_button_confirm_search_clicked), builder);
+
+    // Present the modal window using gtk_window_present
+    gtk_window_present(GTK_WINDOW(modal_window_search));
 }
 
 void on_button_delete_clicked(GtkButton *button, gpointer user_data)
@@ -410,6 +427,11 @@ void on_button_confirm_delete_clicked(GtkButton *button, gpointer user_data)
 
     // Hide the modal window after confirming
     gtk_widget_set_visible(modal_window_delete, FALSE);
+}
+
+void on_button_confirm_search_clicked(GtkButton *button, gpointer user_data)
+{
+    printf("confirm search button created");
 }
 
 int main(int argc, char *argv[])

@@ -2,6 +2,7 @@
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "tov.h": "c",
-        "algorithms.h": "c"
+        "algorithms.h": "c",
+        "blocks.h": "c"
     }
 }
