@@ -6,23 +6,35 @@
 #include <stdbool.h>
 #include <string.h>
 
-/*#define TAILLE_MAX_ENREGISTREMENT 256 | useless since la taille welat doka variable */
+#define TAILLE_MAX_ENREGISTREMENT 256
 #define MAX_ENREGISTREMENTS 100
 #define TAILLE_BUFFER 512
-#define SEPARATEUR '|' //pas encore used
+#define SEPARATEUR '|'
 
 
+
+/*sert a fournir des informations de base sur chaque enregistrement comme son id qui est important
+pour le suivi des enregistrements dans le fichier et la table de hachage*/
 
 /**
  * Structure te3 l'entête enregistrement physique
  * Contient l'ID de l'enregistrement et la taille des donnees.
  */
 typedef struct {
-    int id;
-    int tailleDonnees;
+    int id; //ce champ est utilise pour identifier de maniere unique chaque enregistrement dans le fichier TOV (its used in most functions)
+    int tailleBlocR; //taille block reel ( not used in code , it had a role apr the idea was canceled)
 } EnteteEnregistrement;
 
 
+//adding new champs à l'enregistrement physique
+typedef struct {
+    EnteteEnregistrement entete;
+    //ces trois champs representent les donnees stockees dans chaque enregistrement:
+    char data1[TAILLE_MAX_ENREGISTREMENT];
+    char data2[TAILLE_MAX_ENREGISTREMENT];
+    char data3[TAILLE_MAX_ENREGISTREMENT];
+    //chaque data peut stocker une chaine de caracteres de n'importe quelle taille mais < TAILLE_MAX_ENREGISTREMENT
+    //donc la taille est variable
 //j'ai enlever le champ "separateur" raho wela useless since now un macro separateur a été defini
 typedef struct {
     EnteteEnregistrement entete;
@@ -33,22 +45,42 @@ typedef struct {
 } EnregistrementPhysique;
 
 
+//cette structure est utilisee pour implementer une table de hachage
 typedef struct {
-    int nbEnregistrements;
-    int capaciteMax;
+    /*les indices are calculated by hash function and id of enregistrements are stocked here*/
+    int *table;
+    //ce champ (taille) stocke la taille de la table de hachage, cad le nombre d'elements qu'elle peut contenir
+    int taille;
+} HashTable;
+
+
+//cette structure represente les informations globales concernant le fichier TOV
+typedef struct {
+    int nbEnregistrements; //ce champ stocke le nombre actuel d'enregistrements dans le fichier TOV
+    int capaciteMax;       //le nombre maximum d'enregistrements que le fichier peut contenir
+    int nextID;            // nouveau champ pour suivre l'id global
 } EnteteFichierTOV;
 
-// Structure te3 buffer de transmission
+
+
+//Structure te3 buffer de transmission
 typedef struct {
+    //c un tableau de caracteres used pour stocker temporairement des donnees a transmettre
     char data[TAILLE_BUFFER];
+    // Ce champ is used pour suivre la quantite de donnees actuellement stockees dans le tampon
     int taille;
 } BufferTransmission;
 
-// Structure pour le fichier TOV sans chevauchement
+
+
+//cette structure represente le fichier TOV
 typedef struct {
     EnteteFichierTOV entete;
+    //c un pointeur vers un tableau d'enregistrements physiques , ce tableau stocke les enregistrements individuels contenus dans le fichier TOV
     EnregistrementPhysique *enregistrements;
 } FichierTOV;
+
+
 
 // Prototypes de fonctions pour la gestion du fichier TOV
 
@@ -59,13 +91,13 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 void libererFichierTOV(FichierTOV *fichier);
 
 //Verifiez si fichier et le Buffer ne sont pas NULL
-bool ajouterEnregistrement(FichierTOV *fichier, BufferTransmission *buffer);
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement,BufferTransmission *buffer);
 
 //Verifiez si fichier n'est pas NULL
-bool supprimerEnregistrement(FichierTOV *fichier, int id);
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id,BufferTransmission *buffer);
 
 //Verifiez si fichier n'est pas NULL
-EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, int id);
+EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id); //changed to fit the new function
 
 //Verifiez si fichier n'est pas NULL
 void afficherFichierTOV(const FichierTOV *fichier);

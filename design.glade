@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="4.0" />
+  <object class="GtkWindow" id="main_window">
+    <property name="title">File Manager</property>
+    <property name="default-width">900</property>    <!-- Adjust width as needed -->
+    <property name="default-height">550</property>    <!-- Set between 500 and 600 -->
+    <child>
+      <object class="GtkBox" id="vbox_main">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <!-- Vertical Box for displaying content and buttons -->
+        <child>
+          <!-- Label for displaying content -->
+          <object class="GtkLabel" id="label_content">
+            <attributes>
+              <attribute name="font-desc" value="Sans Bold 10"/>
+              <attribute name="style" value="normal"/>
+              <attribute name="weight" value="semibold"/>
+              <attribute name="scale" value="1.3999999999999999"/>
+            </attributes>
+            <property name="width-request">580</property>
+            <property name="height-request">550</property>
+            <property name="visible">True</property>
+            <property name="label">Hello there. 
+  Try to create a file to continue.
+            </property>
+            <property name="wrap">true</property>
+            <!-- Center align the text -->
+            <property name="justify">center</property>
+          </object>
+        </child>
+
+        <child>
+          <!-- Horizontal Box for buttons -->
+          <object class="GtkBox" id="hbox_buttons">
+            <property name="homogeneous">true</property>
+            <child>
+              <object class="GtkButton" id="button_create">
+                <property name="label">Create</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_add">
+                <property name="label">Add</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_delete">
+                <property name="label">Delete</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_show_content">
+                <property name="label">Show Content</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_search">
+                <property name="label">Search</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_quit">
+                <property name="label">Quit</property>
+                <property name="width-request">150</property>
+                <property name="height-request">100</property>
+                <property name="sensitive">True</property>
+                <property name="visible">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <object class="GtkDialog" id="add_item_modal">
+    <property name="title">Add Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder />
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box">
+        <property name="orientation">vertical</property>
+        <property name="width-request">350</property>
+        <property name="spacing">10</property>        <!-- Add spacing between elements -->
+        <property name="margin-start">10</property>        <!-- Add margin to the left -->
+        <property name="margin-end">10</property>        <!-- Add margin to the right -->
+        <child>
+          <object class="GtkLabel" id="first_name_label">
+            <property name="label">Enter first name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="first_name_entry" />
+        </child>
+        <child>
+          <!-- Error label for first name -->
+          <object class="GtkLabel" id="label_first_name_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="second_name_label">
+            <property name="label">Enter second name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="second_name_entry" />
+        </child>
+        <child>
+          <!-- Error label for second name -->
+          <object class="GtkLabel" id="label_second_name_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="id_label">
+            <property name="label">Enter ID (numbers only):</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="id_entry" />
+        </child>
+        <child>
+          <!-- Error label for ID -->
+          <object class="GtkLabel" id="label_id_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm">
+            <property name="label">Confirm</property>
+            <property name="margin-bottom">30</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+
+  <object class="GtkDialog" id="delete_modal">
+    <property name="title">Delete Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder />
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box_3">
+        <property name="width-request">350</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <child>
+          <object class="GtkLabel" id="id_delete_label">
+            <property name="label">Enter the id:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="id_delete_entry" />
+        </child>
+        <child>
+          <!-- Error label for ID -->
+          <object class="GtkLabel" id="label_id_delete_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm_delete">
+            <property name="label">Confirm</property>
+            <property name="margin-bottom">30</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <object class="GtkDialog" id="search_modal">
+    <property name="title">Search Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder />
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box_4">
+        <property name="width-request">350</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <child>
+          <object class="GtkLabel" id="id_search_label">
+            <property name="label">Enter the id to search:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="id_search_entry_search" />
+        </child>
+        <child>
+          <!-- Error label for ID -->
+          <object class="GtkLabel" id="label_id_search_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm_search">
+            <property name="label">Confirm</property>
+            <property name="margin-bottom">30</property>
+          </object>
+        </child>
+      </object>
+
+
+    </child>
+  </object>
+
+
+
+  <object class="GtkDialog" id="information_modal">
+    <property name="title">Add Item</property>
+    <property name="modal">True</property>
+    <child>
+      <placeholder />
+    </child>
+    <child>
+      <object class="GtkBox" id="modal_box_2">
+        <property name="width-request">350</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>        <!-- Add spacing between elements -->
+        <property name="margin-start">10</property>        <!-- Add margin to the left -->
+        <property name="margin-end">10</property>        <!-- Add margin to the right -->
+        <child>
+          <object class="GtkLabel" id="length_label">
+            <property name="label">Enter the file length:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="length_entry" />
+        </child>
+        <child>
+          <!-- Error label for first name -->
+          <object class="GtkLabel" id="label_length_error">
+            <property name="label" translatable="yes">Invalid input format</property>
+            <property name="visible">False</property>
+            <property name="xalign">0</property>
+            <property name="margin-start">10</property>            <!-- Add margin to the left of the error
+            label -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_confirm_create">
+            <property name="label">Confirm</property>
+            <property name="margin-bottom">30</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
