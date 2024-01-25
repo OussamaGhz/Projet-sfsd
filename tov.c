@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "tov.h"
 #include "string.h"
-//1ere fonction inistialisation du fichier
+     //1ere fonction inistialisation du fichier
 void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLogique *fichierLog) {
     //initialisation de l'entete de fichietTOV
     fichier->entete.nbEnregistrementslogique = 0;
@@ -15,7 +15,7 @@ void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLo
         fichier->enregistrements[i].entete.id = 0;
         fichier->enregistrements[i].entete.tailleDonnees = 0;
         fichier->enregistrements[i].entete.nbrEnregistrementLogique = 0;
-        memset(fichier->enregistrements[i].dataBlock, 0, sizeof(fichier->enregistrements[i].dataBlock));
+        memset(fichier->enregistrements[i].dataBlock, 0, sizeof(fichier->enregistrements[i].dataBlock));//initialiser chaque octet de datablock avec 0 
     }
     printf(" fichier phisique initialiser avec succes\n");
 
@@ -31,20 +31,23 @@ void initialiserFichierTOV(FichierTOV* fichier, int facteurDeBlockage, fichierLo
         fichierLog->classe[i].taille=0;
         memset(fichierLog->classe[i].filiere, 0, sizeof(fichierLog->classe[i].filiere));
     }
-    fichierLog->nbrEnregistrementLogique = 0;
-printf(" fichier logique initialiser avec succes\n");
+      fichierLog->nbrEnregistrementLogique = 0;
+      printf(" fichier logique initialiser avec succes\n");
 
 }
-HashTable* initialiserHachable() {//initialisation de la table hachable
+  //initialisation de la table hachable
+HashTable* initialiserHachable() {
     HashTable* table = malloc(sizeof(HashTable));
     for (int i = 0; i < SIZE; i++) {
         table->tab[i] = NULL;
     }
     return table;
 }
+//function hachable pour retrouver l'index de l'elelement rechercher
 int positiontab(int cle) {
     return cle % SIZE;
 }
+//function d'insertion dans la structure hachable el LIFO
  void insertionhachable(HashTable* table, int cle,int idBlock) {
     int index = positiontab(cle);
     ElementTablHachabl* newelement = malloc(sizeof(ElementTablHachabl));
@@ -52,7 +55,8 @@ int positiontab(int cle) {
     newelement->idBlock = idBlock;
     newelement->next = table->tab[index];
     table->tab[index] = newelement;
-}   
+}
+//function de recherche d'un element dans la structure hachable et qui retourne sa case  
 ElementTablHachabl* rechercherElement(HashTable* table, int cle) {
     
     int index = positiontab(cle);
@@ -65,6 +69,7 @@ ElementTablHachabl* rechercherElement(HashTable* table, int cle) {
     }
     return NULL;
 }
+//function d'affichage de notre tableau
 void afficherTableHachage(HashTable* table) {
     for (int i = 0; i < SIZE; i++) {
         ElementTablHachabl* courant = table->tab[i];
@@ -75,6 +80,7 @@ void afficherTableHachage(HashTable* table) {
         }
     }
 }
+//function d ecgargement de donne apres la fin du traitement (stockage de donne)
 void chargementFinal(FichierTOV* fichierTOV, const char* cheminFichierLogique) {
     FILE* fichierLogique = fopen(cheminFichierLogique, "w");
     if (fichierLogique == NULL) {
@@ -82,36 +88,46 @@ void chargementFinal(FichierTOV* fichierTOV, const char* cheminFichierLogique) {
         return;
     }
 
-    // Iterate over each block in FichierTOV
     for (int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
-        EnregistrementPhysique* block = &(fichierTOV->enregistrements[i]);
 
-        // Traverse the logical records in the block
-        char* ptr = block->dataBlock;
+        EnregistrementPhysique* block = &(fichierTOV->enregistrements[i]);//recuperer le i eme block
+        // recuperer tous les enregistrement logique du i eme block
+        char* ptr = block->dataBlock;//pointe sur le premier caractere
+
         while (ptr < block->dataBlock + block->entete.tailleDonnees) {
-            int tailleEnregLog, etatSuppression, idEnregLog;int k=1;
-            char nom[20], prenom[40], filiere[20];
+            int tailleEnregLog, etatSuppression, idEnregLog;
+            char nom[20], prenoms[110], filiere[20];
             int matricule;
-
-            sscanf(ptr, "%d||%d||%d||%[^|]||%[^|]||%d||%[^|]", &tailleEnregLog, &etatSuppression, &idEnregLog, nom, prenom, &matricule, filiere);
-
-            // Write the logical record to the file
+            //recuperer les donne de l'enregistrement
+            sscanf(ptr, "%d||%d||%d||%[^|]||%[^|]||%d||%[^|]", &tailleEnregLog, &etatSuppression, &idEnregLog, nom, prenoms, &matricule, filiere);
+            
+            //ecrire les information dans le fichier permanent en gardant le format suivie
             fprintf(fichierLogique, "id: %d\n", idEnregLog);
             fprintf(fichierLogique, "nom: %s\n", nom);
-            fprintf(fichierLogique, "prenom %d: %s\n",k, prenom);
+             char* prenomst = prenoms; // Replace with your string of first names
+             char* prenom;
+                int k = 1;
+                // Use strtok to split the string into first names
+                prenom = strtok(prenoms, "$");
+                while (prenom != NULL) {
+                    fprintf(fichierLogique, "prenom %d: %s\n", k, prenom);
+                    prenom = strtok(NULL, "$");
+                    k++;
+                }
             fprintf(fichierLogique, "matricule: %d\n", matricule);
             fprintf(fichierLogique, "filiere: %s\n", filiere);
             fprintf(fichierLogique, "supprimerLogiquement: %d\n", etatSuppression);
             fprintf(fichierLogique, "tailleDonneEnregistrement: %d\n", tailleEnregLog);
 
-            ptr += tailleEnregLog; // Move to the next logical record
+            ptr += tailleEnregLog; // aller au prochaine enregistrement logique
         }
     }
 
     fclose(fichierLogique);
 }
-
+// function de suppression d'un element dans la table hachable
 void supprimerElement(HashTable* table, int cle) {
+
     int index = positiontab(cle);
     ElementTablHachabl* courant = table->tab[index];
     ElementTablHachabl* precedent = NULL;
@@ -130,27 +146,30 @@ void supprimerElement(HashTable* table, int cle) {
         courant = courant->next;
     }
 }
+// function pour modifier le champ idblock d'un element 
 void modifierIdBlock(HashTable* table, int cle, int nouveauIdBlock) {
     ElementTablHachabl* element = rechercherElement(table, cle);
     if (element != NULL) {
         element->idBlock = nouveauIdBlock;
     }
 }
+//fonction de stockage des entete dans la structure permanente
 void ecrireEnteteFichierTOV(FichierTOV* fichierTOV, const char* cheminHeaderInfo) {
+
     FILE* file = fopen(cheminHeaderInfo, "w");
     if (file == NULL) {
         printf("Failed to open the file.\n");
         return;
     }
 
-    // Write the header of the file
+    // ecrire les entetes de fichier avec le format suivie
     fprintf(file, "FichierTOV Header:\n");
     fprintf(file, "nbEnregistrements: %d\n", fichierTOV->entete.nbEnregistrementslogique);
     fprintf(file, "nbrBlock: %d\n", fichierTOV->entete.nbrBlock);
     fprintf(file, "facteurdeblockage: %d\n", fichierTOV->entete.facteurdeblockage);
     fprintf(file, "nextId: %d\n", fichierTOV->entete.nextId);
 
-    // Write the header of each block
+    // ecrire les entetes des block avec le format suivie
     for(int i = 0; i < fichierTOV->entete.nbrBlock; i++) {
         fprintf(file, "\nEnregistrementPhysique %d Header:\n", i);
         fprintf(file, "id: %d\n", fichierTOV->enregistrements[i].entete.id);
@@ -161,14 +180,12 @@ void ecrireEnteteFichierTOV(FichierTOV* fichierTOV, const char* cheminHeaderInfo
     fclose(file);
 }
 
-
-
 //fonction de lecture des informations a partir du fichier logique permanent
 void chargerDonneesFichierLogique(fichierLogique* fichierLog, const char* cheminFichierLogique) {
     FILE* fichierLogiqueFile = fopen(cheminFichierLogique, "r");
-  //fichier n'existe pas
+  // si fichier n'existe pas
     if (fichierLogiqueFile == NULL) {
-        printf("Erreur lors de l'ouverture du fichier.\n");
+        printf("votre fichier n'existe pas.\n");
         return;
     }
 //fichier existe
@@ -177,6 +194,7 @@ void chargerDonneesFichierLogique(fichierLogique* fichierLog, const char* chemin
     char buffer[20];
 
    while (i < MAX_ENREGISTREMENTS && !feof(fichierLogiqueFile)) {
+
     fscanf(fichierLogiqueFile, "id: %d\n", &(enregLog.id));
     fscanf(fichierLogiqueFile, "nom: %s\n", enregLog.nom);
     fscanf(fichierLogiqueFile, "prenom %s: %s\n", buffer, enregLog.prenom);
@@ -203,12 +221,12 @@ void chargerDonneesFichierTOV(HashTable* table,FichierTOV* fichierTOV, const cha
 
 // erreure d'ouverture ou 1 des fichier n'existe pas
     if (headerInfoFile == NULL || fichierLogiqueFile == NULL) {
-        printf("Erreur lors de l'ouverture du fichier.\n");
+        printf("Erreur lors de l'ouverture du fichier ou vos fichier n'existe pas.\n");
         return;
     }
 
 //les 2 fichier sont ouverts
-//lecture de l'entete du fichier backend
+//lecture de l'entete du fichier backend selon le format suivie
  fscanf(headerInfoFile, "FichierTOV Header:\n");
     fscanf(headerInfoFile, "nbEnregistrements: %d\n", &(fichierTOV->entete.nbEnregistrementslogique));
     fscanf(headerInfoFile, "nbrBlock: %d\n", &(fichierTOV->entete.nbrBlock));
@@ -230,22 +248,32 @@ for (int j = 0; j < fichierTOV->enregistrements[i].entete.nbrEnregistrementLogiq
 
     fscanf(fichierLogiqueFile, "id: %d\n", &(enregLog.id));//lecture de l'id de l'etudiant
     fscanf(fichierLogiqueFile, "nom: %s\n", enregLog.nom);//lecture du nom
-    insertionhachable(table,enregLog.id,fichierTOV->enregistrements[i].entete.id);
+    insertionhachable(table,enregLog.id,fichierTOV->enregistrements[i].entete.id);//insertion de l'element dans la structure hachable
     int k = 0;
     char prenom[20];
-    char prenoms[40] = ""; // Pour stocker tous les prénoms (concatenation)
-
-    while (k < 2 && fscanf(fichierLogiqueFile, "prenom %d: %s\n", &k, prenom) == 2) {//si il reussi a lire le prenom
-        enregLog.prenom[k-1] = malloc(strlen(prenom) + 1);
-        strcpy(enregLog.prenom[k-1], prenom);
+    char prenoms[110] = ""; // Pour stocker tous les prénoms (concatenation)
+    int b;
+    while (k < 5 && fscanf(fichierLogiqueFile, "prenom %d: %s\n", &b, prenom) == 2) {//si il reussi a lire le prenom
+        enregLog.prenom[k] = malloc(strlen(prenom) + 1);
+        strcpy(enregLog.prenom[k], prenom);
         strcat(prenoms, prenom); // Ajouter le prénom à la chaîne des prénoms (concatenation) pour avoire le format phisique souhaite
+       // separer les prenom avec un $
+        strcat(prenoms, "$");
+    
+    k++;
     }
+    // Remove the last character from prenoms if it's a '$'
+    int len = strlen(prenoms);
+    if (prenoms[len - 1] == '$') {
+        prenoms[len - 1] = '\0';
+    }
+
     fscanf(fichierLogiqueFile, "matricule: %d\n", &(enregLog.matricule));
     fscanf(fichierLogiqueFile, "filiere: %s\n", enregLog.filiere);
     fscanf(fichierLogiqueFile, "supprimerLogiquement: %d\n", &(enregLog.suplogique));
     fscanf(fichierLogiqueFile, "tailleDonneEnregistrement: %d\n", &(enregLog.taille));
     
-    // Ajouter les données logiques au bloc de données
+    // Ajouter les données logiques au bloc de données en suivant le format 
     sprintf(fichierTOV->enregistrements[i].dataBlock + strlen(fichierTOV->enregistrements[i].dataBlock), "%d||%d||%d||%s||%s||%d||%s||",enregLog.taille,enregLog.suplogique,enregLog.id, enregLog.nom,prenoms, enregLog.matricule, enregLog.filiere);
 }
         i++;
@@ -261,7 +289,7 @@ void chargerDonnees(HashTable* table,FichierTOV* fichierTOV, fichierLogique* fic
     chargerDonneesFichierTOV(table,fichierTOV, cheminHeaderInfo,cheminFichierLogique);
 }
 
-// verification de resussite de chargement
+// verification de resussite de chargement en affichant les entetes de la structure tov
 void afficherDonneesFichierTOV(FichierTOV* fichierTOV) {
     printf("Affichage des données du FichierTOV :\n");
     printf("affichage de l'entete de fichier apres chargement : %d %d %d %d\n",fichierTOV->entete.nbEnregistrementslogique,fichierTOV->entete.nbrBlock,fichierTOV->entete.facteurdeblockage,fichierTOV->entete.nextId);
@@ -272,7 +300,7 @@ void afficherDonneesFichierTOV(FichierTOV* fichierTOV) {
         printf("  Nombre d'enregistrements logiques: %d\n", fichierTOV->enregistrements[i].entete.nbrEnregistrementLogique);
         printf("  Données du bloc: %s\n", fichierTOV->enregistrements[i].dataBlock);
     }
-}//verification de reussite de l'insertion
+}//verification de reussite de l'insertion en affichant la structure tov completement
 void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
     printf("Affichage des données du FichierTOV :\n");
     printf("affichage de l'entete de fichier apres chargement : %d %d %d %d\n",fichierTOV->entete.nbEnregistrementslogique,fichierTOV->entete.nbrBlock,fichierTOV->entete.facteurdeblockage,fichierTOV->entete.nextId);
@@ -297,10 +325,10 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
     afficherDonneesFichierTOV(fichierTOV);
     afficherTableHachage(table);
     int currentBlock=0;
- if(fichierTOV->entete.nbrBlock!=0){
+ if(fichierTOV->entete.nbrBlock!=0){// on se postione au dernier block
      currentBlock=fichierTOV->entete.nbrBlock-1;
     }
-    for(int i = 0; i < nbrInsertion; i++) {//verification de la capacite max
+    for(int i = 0; i < nbrInsertion; i++) { //verification de la capacite max
         if (fichierLog->nbrEnregistrementLogique >= MAX_ENREGISTREMENTS) {
             printf("le fichierLogique est remplie. on ne peut pas inserer plus d'enregistrement.\n");
             return;
@@ -309,29 +337,31 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
         enregistrementLogique enregLog;
         
         enregLog.id=fichierTOV->entete.nbEnregistrementslogique;
-        enregLog.suplogique=0;                         //determination de l'id de chaque etudiant automatiquement
+        enregLog.suplogique=0;                          //determination de l'id de chaque etudiant automatiquement
         printf("Enter nom: ");
         scanf("%s", enregLog.nom);
         
         int n;
         printf("entrer le nombre de vos prenom: ");
-        scanf("%d",&n); //max 2 jusqu'a maintenant selon le format
-        char chaine[40]="";//pour la concatenation (besois dans le stockage de data)
-
-        for(int j = 0; j < n; j++) {
-            enregLog.prenom[j] = malloc(20 * sizeof(char));
-            printf("Enter prenom %d: ", j+1);
-            scanf("%s", enregLog.prenom[j]);//insertion des prenom
-            strcat(chaine,enregLog.prenom[j]);//concatenation des prenoms dans chaine
-        }
-
+        scanf("%d",&n); //max 5 jusqu'a maintenant selon le format
+        char chaine[110]="";//pour la concatenation (besois dans le stockage de data)
+         
+         for(int j = 0; j < n; j++) {
+    enregLog.prenom[j] = malloc(20 * sizeof(char));
+    printf("Enter prenom %d: ", j+1);
+    scanf("%s", enregLog.prenom[j]);//insertion des prenom
+    strcat(chaine, enregLog.prenom[j]);//concatenation des prenoms dans chaine pour avoire le format souhaite
+    if (j < n - 1) {// separer les prenom avec un |
+        strcat(chaine, "$");
+    }
+}
         printf("Enter matricule: ");
         scanf("%d", &(enregLog.matricule));
 
         printf("Enter filiere: ");
         scanf("%s", enregLog.filiere);
 
-        char enregLogTov[256];//suport de stockage contenant le format de data souhaite
+        char enregLogTov[256];//suport de stockage contenant le format de data souhaite on le considere comme etant le buffer
         sprintf(enregLogTov, "%d||%d||%s||%s||%d||%s||",enregLog.suplogique,enregLog.id,enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
         int tailleenrgistrement=strlen(enregLogTov);
         char enreglog2[20];//pour la transition
@@ -369,7 +399,7 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
             fichierTOV->enregistrements[currentBlock].entete.nbrEnregistrementLogique = 0;
             fichierTOV->entete.nbrBlock++;
         }
-        insertionhachable(table,enregLog.id,fichierTOV->enregistrements[currentBlock].entete.id);
+        insertionhachable(table,enregLog.id,fichierTOV->enregistrements[currentBlock].entete.id);//insertion de l'elment dans la table hachable
         
         //copie des element inserer dans le fichier Tov (stockage temporaire dans la structure TOV)
         sprintf(enregLogTov, "%d||%d||%d||%s||%s||%d||%s||",tailleenrgistrement,enregLog.suplogique,enregLog.id,enregLog.nom,chaine, enregLog.matricule, enregLog.filiere);//copie des information pour avoire le format souhaite
@@ -404,8 +434,6 @@ void afficherDonneesFichierTOv(FichierTOV* fichierTOV) {
      afficherTableHachage(table);
 }
 
-
-
 void suppressionStructuretemp(int id) {
     char cheminFichierLogique[] = "fichierLotest4.txt"; // Remplacez par le chemin vers votre fichier
     char cheminFichierTemp[] = "fichierLogiqueMouvement.txt"; // Remplacez par le chemin vers un fichier temporaire
@@ -425,7 +453,6 @@ void suppressionStructuretemp(int id) {
                 fputs(ligne, fichierTemp);
             }
         }
-
         // Réinitialiser les fichiers pour la prochaine suppression
         fclose(fichierLogique);
         fclose(fichierTemp);
@@ -491,7 +518,7 @@ void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppress
         printf("%d",element->id);
         printf("%d\n",idBlock);
         // Parcourir les enregistrements logiques dans le bloc
-        
+
         char* ptr = block->dataBlock;
         while (ptr < block->dataBlock + block->entete.tailleDonnees) {
             int tailleEnregLog, etatSuppression, idEnregLog;
@@ -542,10 +569,6 @@ void supprimerPhysique(HashTable* table, FichierTOV* fichierTOV, int nbrSuppress
     }
 }
 
-
-
-
-
 int main(){
 
     fichierLogique fichier2;
@@ -553,11 +576,11 @@ int main(){
     int facteurDeBlockage;
     HashTable* table = initialiserHachable();
     initialiserFichierTOV(&fichier,2,&fichier2);
-    insertionLogique(table,&fichier2,&fichier,0,2,"fichierLotest4.txt","headerInftest4.txt");
+    insertionLogique(table,&fichier2,&fichier,2,2,"fichierLotest4.txt","headerInftest4.txt");
     suppressionLogique(table,&fichier,3);
    supprimerPhysique(table,&fichier,2);
    chargementFinal(&fichier,"fichierLotest4.txt");
-
+   
 }
 
 
