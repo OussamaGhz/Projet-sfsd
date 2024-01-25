@@ -39,7 +39,7 @@ typedef struct {
     /*les indices are calculated by hash function and id of enregistrements are stocked here*/
     int *table;
     //ce champ (taille) stocke la taille de la table de hachage, cad le nombre d'elements qu'elle peut contenir
-    int taille;t
+    int taille;
 } HashTable;
 
 
@@ -80,10 +80,10 @@ void initialiserFichierTOV(FichierTOV *fichier, int capaciteMax);
 void libererFichierTOV(FichierTOV *fichier);
 
 //Verifiez si fichier et le Buffer ne sont pas NULL
-bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement);
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement,BufferTransmission *buffer);
 
 //Verifiez si fichier n'est pas NULL
-bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id);
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id,BufferTransmission *buffer);
 
 //Verifiez si fichier n'est pas NULL
 EnregistrementPhysique *rechercherEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id); //changed to fit the new function

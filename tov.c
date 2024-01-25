@@ -75,118 +75,96 @@ void libererFichierTOV(FichierTOV *fichier) {
 
 
 //la fonction d'insertion                  (checked)
-bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement) {
-
-    //verification si les 2 pointeurs sont NULL pour eviter des erreurs de segmentation
-    if (fichier == NULL || enregistrement == NULL) return false;
+bool ajouterEnregistrement(FichierTOV *fichier, HashTable *hashTable, EnregistrementPhysique *enregistrement, BufferTransmission *buffer) {
+    if (fichier == NULL || enregistrement == NULL || buffer == NULL) return false;
 
     const char *nomFichier = "monFichierTOV.tov";
-
-    FILE *fichierPhysique = fopen(nomFichier, "a"); //we write à la fin du fichier sans ecraser son contenu actuel
+    FILE *fichierPhysique = fopen(nomFichier, "a");
     if (fichierPhysique == NULL) return false;
 
-     //check la capacite maximale avant d'inserer
     if (fichier->entete.nbEnregistrements >= fichier->entete.capaciteMax) {
         fclose(fichierPhysique);
         return false;
     }
 
-    //en ajoutant cette linge de code , le probleme de id is fixed :)
-    enregistrement->entete.id = fichier->entete.nextID++; //chaque fois on ajoute un enregistrement on incremente
+    enregistrement->entete.id = fichier->entete.nextID++;
 
-    //ecrire les donnees de l'enregistrement dans le fichier
+    // Utilize buffer for data1
+    remplirBuffer(buffer, enregistrement->data1);
     fprintf(fichierPhysique, "%d|%s|%s|%s\n",
             enregistrement->entete.id,
-            enregistrement->data1,
+            buffer->data, // Using buffer's data
             enregistrement->data2,
             enregistrement->data3);
+    viderBuffer(buffer);
 
-    //ajouter l'enregistrement dans le tableau en memoire
     fichier->enregistrements[fichier->entete.nbEnregistrements] = *enregistrement;
     fichier->entete.nbEnregistrements++;
 
     fclose(fichierPhysique);
 
-    //mise à jour de la table de hashage
-    int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille); //appelle la fonction hashFunction, en lui passant l'id de l'enregistrement
+    int indexHash = hashFunction(enregistrement->entete.id, hashTable->taille);
     hashTable->table[indexHash] = enregistrement->entete.id;
 
     return true;
 }
 
-
 //supprimer un enregistrement specified with his ID du fichier TOV:     (checked)
-bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id) {
-
+bool supprimerEnregistrement(FichierTOV *fichier, HashTable *hashTable, int id, BufferTransmission *buffer) {
     const char *nomFichier = "monFichierTOV.tov";
-    //cree et open un fichier temporaire pour stocker temporairement les enregistrements qui ne sont pas supprimes.
     const char *nomFichierTemp = "tempFichierTOV.tov";
 
-    if (fichier == NULL) return false;
+    if (fichier == NULL || buffer == NULL) return false;
 
-    //ouvrir le fichier d'origine en mode lecture en utilisant fopen et stocke le pointeur dans fichierPhysique
     FILE *fichierPhysique = fopen(nomFichier, "r");
-    //ouvrir le fichier temporaire en mode ecriture en utilisant fopen et stocke le pointeur dans fichierTemp
     FILE *fichierTemp = fopen(nomFichierTemp, "w");
 
-
-    //cela va confirmer que la suppression n'est pas effectuee si l'ouverture des fichiers de donnees has failed
     if (fichierPhysique == NULL || fichierTemp == NULL) {
         if (fichierPhysique != NULL) fclose(fichierPhysique);
         if (fichierTemp != NULL) fclose(fichierTemp);
         return false;
     }
 
-    //variables
     char ligne[1024];
     EnregistrementPhysique temp;
     bool found = false;
     int indexFound = -1;
 
-    //lecture des enregistrements
     for (int i = 0; fgets(ligne, sizeof(ligne), fichierPhysique) != NULL; ++i) {
-
-        //chaque ligne est stockee dans la variable ligne
         sscanf(ligne, "%d|%s", &temp.entete.id, temp.data1);
-        /*la fonction compare l'ID de chaque enregistrement a l'ID given by user.
-        Si l'ID correspond, this means que l'enregistrement doit etre deleted.*/
         if (temp.entete.id != id) {
             fputs(ligne, fichierTemp);
         } else {
-        //La variable found est definie à true et l'indice de l'enregistrement a supprimer (indexFound) est stocke.
             found = true;
             indexFound = i;
+            remplirBuffer(buffer, temp.data1); //adding the data to the buffer
         }
     }
 
     fclose(fichierPhysique);
     fclose(fichierTemp);
 
-    //si un enregistrement avec l'ID specifie a ete trouve ( foud == true)
     if (found) {
-        //remplace l'ancien fichier par le nouveau
         remove(nomFichier);
         rename(nomFichierTemp, nomFichier);
 
-        //mettre à jour la structure en memoire
         for (int i = indexFound; i < fichier->entete.nbEnregistrements - 1; ++i) {
             fichier->enregistrements[i] = fichier->enregistrements[i + 1];
         }
         fichier->entete.nbEnregistrements--;
-        
-        //reinitialise l'emplacement de l'enregistrement supprime avec des zeros en utilisant memset
         memset(&fichier->enregistrements[fichier->entete.nbEnregistrements], 0, sizeof(EnregistrementPhysique));
     } else {
         remove(nomFichierTemp);
     }
 
-    //same thing kima wch derna f la fonction ajouter enregistrement
     int indexHash = hashFunction(id, hashTable->taille);
-    //bch nbyno beli cet emplacement est vide dans la table de hashage apres la suppresion
     hashTable->table[indexHash] = -1;
+
+    viderBuffer(buffer); // Clearing the buffer after use
 
     return found;
 }
+
 
 
 //fonction de recherche optimised to perfection using hachage:        (checked)
@@ -257,13 +235,13 @@ unsigned long CalculerTailleEnregistrement(const EnregistrementPhysique *enregis
 
 
 //utiliser les fonctions dans main
+#include "tov.h"
+
 int main() {
-    //explication des variables
     FichierTOV fichier;
     HashTable hashTable;
-    BufferTransmission buffer;
+    BufferTransmission buffer; // Buffer declared here
     int choix, id, capaciteFichier;
-    char data[TAILLE_BUFFER];
     EnregistrementPhysique newEnregistrement;
 
     printf("Entrez la capacité maximale du fichier TOV: ");
@@ -273,9 +251,7 @@ int main() {
     initialiserFichierTOV(&fichier, capaciteFichier);
     initialiserHashTable(&hashTable, capaciteFichier);
 
-
-    while(1)
-    {
+    while(1) {
         printf("\nChoisissez une operation:\n");
         printf("1- Ajouter un enregistrement\n");
         printf("2- Supprimer un enregistrement\n");
@@ -286,11 +262,7 @@ int main() {
         scanf("%d", &choix);
         getchar();
         
-        
-        switch(choix)
-        {
-
-            //changment dans le cas d'ajouter un enregistrement pour avoir 3 champs
+        switch(choix) {
             case 1: {
                 printf("Entrez les donnees de l'enregistrement:\n");
                 printf("data1: ");
@@ -305,60 +277,52 @@ int main() {
                 fgets(newEnregistrement.data3, TAILLE_MAX_ENREGISTREMENT, stdin);
                 newEnregistrement.data3[strcspn(newEnregistrement.data3, "\n")] = '\0';
 
-                if (ajouterEnregistrement(&fichier, &hashTable, &newEnregistrement)){
+                if (ajouterEnregistrement(&fichier, &hashTable, &newEnregistrement, &buffer)) {
                     printf("Enregistrement ajoute avec succes\n");
-                }
-                else{
+                } else {
                     printf("Erreur lors de l'ajout de l'enregistrement\n");
                 }
                 break;
             }
 
-
-
-            case 2:  //supprimer un enregistrement
+            case 2: {
                 printf("Entrez l'ID de l'enregistrement à supprimer: ");
                 scanf("%d", &id);
                 getchar();
-                if (supprimerEnregistrement(&fichier, &hashTable, id)) {
+                if (supprimerEnregistrement(&fichier, &hashTable, id, &buffer)) {
                     printf("Enregistrement supprime\n");
                 } else {
                     printf("Enregistrement non trouve.\n");
                 }
                 break;
+}
 
 
-            case 3: //1st try of rechercherEenregistrement avec le HASH INDEX with a basic if condition
-            printf("Entrez l'ID de l'enregistrement à rechercher: ");
-            scanf("%d", &id);
-            getchar();
-
-            EnregistrementPhysique *trouve = rechercherEnregistrement(&fichier, &hashTable, id);
-            if (trouve) {
-                printf("enregistrement trouve:\n");
-                printf("ID: %d, Data1: %s\n", trouve->entete.id, trouve->data1);
-            } else {
-                printf("enregistrement non trouve.\n");
+            case 3: {
+                printf("Entrez l'ID de l'enregistrement à rechercher: ");
+                scanf("%d", &id);
+                getchar();
+                EnregistrementPhysique *trouve = rechercherEnregistrement(&fichier, &hashTable, id);
+                if (trouve) {
+                    printf("Enregistrement trouve:\n");
+                    printf("ID: %d, Data1: %s\n", trouve->entete.id, trouve->data1);
+                } else {
+                    printf("Enregistrement non trouve.\n");
+                }
+                break;
             }
-            break;
-
 
             case 4:
                 afficherFichierTOV(&fichier);
                 break;
 
-
-
-            case 5://quitter
+            case 5: // Quitter
                 libererFichierTOV(&fichier);
                 return 0;
 
             default:
-                printf("choix non valide. enter again\n");
-        
-
+                printf("Choix non valide. Veuillez entrer à nouveau\n");
         }
-
     }
     return 0;
 }
