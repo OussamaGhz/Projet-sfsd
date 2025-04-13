@@ -197,18 +197,3 @@ Memory is freed when:
 - The application exits
 - The TOV file is closed
 
-## Potential Improvements
-
-1. **Collision Handling**: The current hash table implementation doesn't handle collisions well. A more robust collision resolution strategy could be implemented.
-
-2. **File Format**: The current delimiter-based format could be enhanced to support more complex data or variable-length fields.
-
-3. **Error Recovery**: Better mechanisms for recovering from file corruption or operation failures.
-
-4. **User Experience**: Enhanced UI with sorting, filtering, and more intuitive controls.
-
-5. **Performance Optimization**: For large files, implementing pagination or lazy loading.
-
-6. **Code Organization**: Further modularization of the codebase for better maintainability.
-
-7. **Documentation**: Adding inline documentation for all functions and structures.
